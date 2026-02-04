@@ -20,7 +20,11 @@ const DEFAULT_CHARACTERS = {
     '飯': { pinyin: 'fàn', strokes: 13, difficulty: 2, frequency: 87 }.
     '菜': { pinyin: 'cài', strokes: 12, difficulty: 2, frequency: 86 },
     '果': { pinyin: 'guǒ', strokes: 8, difficulty: 2, frequency: 83 },
-    '汁': { pinyin: 'zhī', strokes: 6, difficulty: 1, frequency: 83 }
+    '汁': { pinyin: 'zhī', strokes: 6, difficulty: 1, frequency: 83 },
+    '奶': { pinyin: 'nǎi', strokes: 5, difficulty: 1, frequency: 83 },
+    '包': { pinyin: 'bāo', strokes: 5, difficulty: 1, frequency: 89 },
+    '湯': { pinyin: 'tāng', strokes: 13, difficulty: 2, frequency: 82 },
+    '茶': { pinyin: 'chá', strokes: 10, difficulty: 2, frequency: 84 }
 };
 
 // Default phrase combinations with requirements
@@ -64,6 +68,14 @@ const DEFAULT_PHRASES = {
         frequency: 85,
         pinyin: 'yī gè',
         meaning: 'one (measure word)'
+    },
+    '麵包': {
+        characters: ['麵', '包'],
+        requirements: { '麵': 2, '包': 3 },
+        difficulty: 3,
+        frequency: 82,
+        pinyin: 'miàn bāo',
+        meaning: 'bread'
     }
 };
 
@@ -254,7 +266,7 @@ class Phrase {
     // Calculate combined defense
     calculateDefense() {
         const baseDefense = 12;
-        const frequencyBonus = Math.floor(this.frequency / 15);
+        const frequencyBonus = 15 - Math.floor(this.frequency / 15);
         const levelBonus = (this.level - 1) * 3;
         return baseDefense + frequencyBonus + levelBonus;
     }
