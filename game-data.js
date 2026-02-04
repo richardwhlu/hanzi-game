@@ -17,7 +17,7 @@ const DEFAULT_CHARACTERS = {
     '喝': { pinyin: 'hē', strokes: 12, difficulty: 2, frequency: 85 },
     '夠': { pinyin: 'gòu', strokes: 11, difficulty: 4, frequency: 80 },
     '麵': { pinyin: 'miàn', strokes: 20, difficulty: 4, frequency: 80 },
-    '飯': { pinyin: 'fàn', strokes: 13, difficulty: 2, frequency: 87 }.
+    '飯': { pinyin: 'fàn', strokes: 13, difficulty: 2, frequency: 87 },
     '菜': { pinyin: 'cài', strokes: 12, difficulty: 2, frequency: 86 },
     '果': { pinyin: 'guǒ', strokes: 8, difficulty: 2, frequency: 83 },
     '汁': { pinyin: 'zhī', strokes: 6, difficulty: 1, frequency: 83 },

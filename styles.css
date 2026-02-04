@@ -99,6 +99,35 @@ body {
     box-shadow: 1px 1px 0 var(--gbc-shadow);
 }
 
+/* Reset button styling (dangerous action) */
+.reset-btn {
+    background: var(--gbc-red);
+    color: var(--gbc-lightest);
+    border-color: var(--gbc-shadow);
+}
+
+.reset-btn:hover {
+    background: #ff4444;
+    color: var(--gbc-lightest);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--gbc-shadow);
+    animation: pulse 1s infinite;
+}
+
+.reset-btn:active {
+    transform: translate(0, 0);
+    box-shadow: 1px 1px 0 var(--gbc-shadow);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
 /* Screen management */
 .game-main {
     padding: calc(var(--pixel-unit) * 4);

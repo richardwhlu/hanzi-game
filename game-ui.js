@@ -60,6 +60,7 @@ class GameUI {
         document.getElementById('export-btn').addEventListener('click', () => this.exportGame());
         document.getElementById('load-btn').addEventListener('click', () => this.loadGame());
         document.getElementById('manage-btn').addEventListener('click', () => this.showScreen('manage-screen'));
+        document.getElementById('game-reset-btn').addEventListener('click', () => this.resetGame());
         
         // Navigation events
         document.getElementById('back-btn').addEventListener('click', () => this.showScreen('character-select'));
@@ -612,6 +613,32 @@ class GameUI {
         
         URL.revokeObjectURL(url);
         this.showMessage('Game data exported successfully!', 'success');
+    }
+    
+    // Reset game data
+    resetGame() {
+        // Show confirmation dialog
+        if (confirm('⚠️ This will delete ALL your progress and reset the game to the beginning.\n\nThis action cannot be undone! Are you sure you want to continue?')) {
+            const secondConfirm = confirm('Are you REALLY sure? This will permanently delete:\n• All characters and their progress\n• All phrases and unlocks\n• Player level and XP\n• Battle records\n\nThis cannot be undone!');
+            
+            if (secondConfirm) {
+                try {
+                    // Clear localStorage
+                    localStorage.removeItem('hanzi-game-save');
+                    
+                    // Show confirmation message
+                    this.showMessage('Game reset complete! The page will reload...', 'success');
+                    
+                    // Reload the page to start fresh
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } catch (error) {
+                    console.error('Error resetting game:', error);
+                    this.showMessage('Error resetting game data. Please refresh the page manually.', 'error');
+                }
+            }
+        }
     }
     
     // Show temporary message
