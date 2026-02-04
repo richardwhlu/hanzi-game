@@ -649,12 +649,12 @@ class GameUI {
             return;
         }
         
-        // Initialize battle state
+        // Initialize battle state - always reset HP and defeated status for new battles
         this.battleState = {
             playerCharacters: availableCharacters.map(char => ({
                 ...char,
-                currentHP: char.hp,
-                defeated: false
+                currentHP: char.hp, // Reset to full HP
+                defeated: false     // Reset defeated status
             })),
             currentPlayerCharacter: null,
             enemy: null,
