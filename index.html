@@ -8,27 +8,32 @@
     <link rel="alternate icon" href="favicon.svg">
     <link rel="shortcut icon" href="favicon.svg">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@4/dist/hanzi-writer.min.js"></script>
+    <script src="https://unpkg.com/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
     <script>
-        // Check if HanziWriter loaded, if not try alternative CDN
-        window.addEventListener('load', function() {
+        // Check if HanziWriter loaded, if not try local fallback
+        window.addEventListener('DOMContentLoaded', function() {
             if (typeof HanziWriter === 'undefined') {
-                console.log('Primary HanziWriter CDN failed, trying alternative...');
+                console.log('CDN HanziWriter failed, trying local fallback...');
                 const script = document.createElement('script');
-                script.src = 'https://unpkg.com/hanzi-writer@4/dist/hanzi-writer.min.js';
+                script.src = './hanzi-writer.min.js';
                 script.onload = function() {
-                    console.log('Alternative HanziWriter CDN loaded successfully');
+                    console.log('Local HanziWriter loaded successfully');
                     if (window.game && window.gameUI) {
                         window.gameUI.showMessage('Library loaded! You can now practice characters.', 'success');
                     }
                 };
                 script.onerror = function() {
-                    console.error('Both HanziWriter CDNs failed');
+                    console.error('Both CDN and local HanziWriter failed');
                     if (window.gameUI) {
-                        window.gameUI.showMessage('Failed to load character writing library. Please check your internet connection.', 'error');
+                        window.gameUI.showMessage('Failed to load character writing library. Please refresh the page or check your connection.', 'error');
+                    } else {
+                        // Show basic error if UI isn't loaded yet
+                        document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;"><h2>⚠️ Loading Error</h2><p>Failed to load the character writing library.<br>Please refresh the page or check your internet connection.</p><button onclick="location.reload()">Refresh Page</button></div>';
                     }
                 };
                 document.head.appendChild(script);
+            } else {
+                console.log('HanziWriter loaded from CDN successfully');
             }
         });
     </script>
@@ -63,10 +68,14 @@
             <!-- Character selection screen -->
             <div id="character-select" class="screen active">
                 <h2>Choose a Character to Practice</h2>
-                <div id="character-grid" class="character-grid">
+                <div id="loading-indicator" class="loading-message">
+                    <div class="loading-spinner"></div>
+                    <p>Loading Hanzi Creatures...</p>
+                </div>
+                <div id="character-grid" class="character-grid" style="display: none;">
                     <!-- Characters will be dynamically loaded here -->
                 </div>
-                <button id="add-character-btn" class="pixel-btn">Add New Character</button>
+                <button id="add-character-btn" class="pixel-btn" style="display: none;">Add New Character</button>
             </div>
 
             <!-- Practice screen -->

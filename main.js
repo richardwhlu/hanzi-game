@@ -20,6 +20,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize UI
         gameUI.init();
         
+        // Hide loading indicator and show the game
+        setTimeout(() => {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const characterGrid = document.getElementById('character-grid');
+            const addButton = document.getElementById('add-character-btn');
+            
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            if (characterGrid) characterGrid.style.display = 'grid';
+            if (addButton) addButton.style.display = 'block';
+        }, 1000);
+        
         // Add some CSS animations dynamically
         addCustomAnimations();
         

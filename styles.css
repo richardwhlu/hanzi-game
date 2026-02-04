@@ -357,3 +357,16 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* Loading message */
+.loading-message {
+    text-align: center;
+    padding: calc(var(--pixel-unit) * 8);
+    font-size: 18px;
+    color: var(--gbc-dark-green);
+}
+
+.loading-message p {
+    margin-top: calc(var(--pixel-unit) * 4);
+    font-weight: bold;
+}
