@@ -24,7 +24,8 @@ const DEFAULT_CHARACTERS = {
     '奶': { pinyin: 'nǎi', strokes: 5, difficulty: 1, frequency: 83 },
     '包': { pinyin: 'bāo', strokes: 5, difficulty: 1, frequency: 89 },
     '湯': { pinyin: 'tāng', strokes: 13, difficulty: 2, frequency: 82 },
-    '茶': { pinyin: 'chá', strokes: 10, difficulty: 2, frequency: 84 }
+    '茶': { pinyin: 'chá', strokes: 10, difficulty: 2, frequency: 84 },
+    '个': { pinyin: 'gè', strokes: 3, difficulty: 1, frequency: 95 }
 };
 
 // Default phrase combinations with requirements
