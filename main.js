@@ -37,8 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Setup global error handling
         setupErrorHandling();
         
-        // Add export functionality to save button (right-click)
-        setupExportFunctionality();
+        // Export functionality now handled by dedicated Export button
         
         console.log('Hanzi Creatures - Ready to play!');
         

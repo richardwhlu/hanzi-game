@@ -47,6 +47,7 @@ class GameUI {
     bindEvents() {
         // Header button events
         document.getElementById('save-btn').addEventListener('click', () => this.saveGame());
+        document.getElementById('export-btn').addEventListener('click', () => this.exportGame());
         document.getElementById('load-btn').addEventListener('click', () => this.loadGame());
         document.getElementById('manage-btn').addEventListener('click', () => this.showScreen('manage-screen'));
         
