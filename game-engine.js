@@ -166,27 +166,37 @@ class HanziGame {
             throw new Error(`Container ${containerId} not found`);
         }
         
+        // Check if HanziWriter is available
+        if (typeof HanziWriter === 'undefined') {
+            throw new Error('HanziWriter library is not loaded. Please check your internet connection and refresh the page.');
+        }
+        
         // Clear previous writer
         container.innerHTML = '';
         
-        this.currentWriter = HanziWriter.create(container, char, {
-            width: 300,
-            height: 300,
-            padding: 20,
-            strokeAnimationSpeed: 1,
-            delayBetweenStrokes: 100,
-            strokeHighlightSpeed: 2,
-            
-            // Quiz configuration
-            showHintAfterMisses: 3,
-            leniency: 1.2, // Slightly more lenient for kids
-            acceptBackwardsStrokes: false,
-            
-            // Event callbacks
-            onMistake: (strokeData) => this.handleMistake(strokeData),
-            onCorrectStroke: (strokeData) => this.handleCorrectStroke(strokeData),
-            onComplete: (summary) => this.handleComplete(summary)
-        });
+        try {
+            this.currentWriter = HanziWriter.create(container, char, {
+                width: 300,
+                height: 300,
+                padding: 20,
+                strokeAnimationSpeed: 1,
+                delayBetweenStrokes: 100,
+                strokeHighlightSpeed: 2,
+                
+                // Quiz configuration
+                showHintAfterMisses: 3,
+                leniency: 1.2, // Slightly more lenient for kids
+                acceptBackwardsStrokes: false,
+                
+                // Event callbacks
+                onMistake: (strokeData) => this.handleMistake(strokeData),
+                onCorrectStroke: (strokeData) => this.handleCorrectStroke(strokeData),
+                onComplete: (summary) => this.handleComplete(summary)
+            });
+        } catch (error) {
+            console.error('Error creating HanziWriter:', error);
+            throw new Error(`Failed to create character writer: ${error.message}`);
+        }
         
         return this.currentWriter;
     }

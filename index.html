@@ -4,8 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hanzi Creatures - Learn Chinese Characters</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="favicon.svg">
+    <link rel="shortcut icon" href="favicon.svg">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@4/dist/hanzi-writer.min.js"></script>
+    <script>
+        // Check if HanziWriter loaded, if not try alternative CDN
+        window.addEventListener('load', function() {
+            if (typeof HanziWriter === 'undefined') {
+                console.log('Primary HanziWriter CDN failed, trying alternative...');
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/hanzi-writer@4/dist/hanzi-writer.min.js';
+                script.onload = function() {
+                    console.log('Alternative HanziWriter CDN loaded successfully');
+                    if (window.game && window.gameUI) {
+                        window.gameUI.showMessage('Library loaded! You can now practice characters.', 'success');
+                    }
+                };
+                script.onerror = function() {
+                    console.error('Both HanziWriter CDNs failed');
+                    if (window.gameUI) {
+                        window.gameUI.showMessage('Failed to load character writing library. Please check your internet connection.', 'error');
+                    }
+                };
+                document.head.appendChild(script);
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="game-container">
