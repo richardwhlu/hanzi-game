@@ -101,12 +101,14 @@ class HanziGame {
         }
         
         // Use default data if available, otherwise create basic entry
-        const characterData = DEFAULT_CHARACTERS[char] || {
-            pinyin: data.pinyin || '',
-            strokes: data.strokes || 1,
-            difficulty: data.difficulty || 1,
-            frequency: data.frequency || 50
-        };
+        const characterData = DEFAULT_CHARACTERS[char] ? 
+            { ...DEFAULT_CHARACTERS[char], ...data } :  // Merge with defaults if available
+            {
+                pinyin: data.pinyin || '',
+                strokes: data.strokes || 5, // reasonable default
+                difficulty: data.difficulty || 1,
+                frequency: data.frequency || 50
+            };
         
         this.characters[char] = new Character(char, characterData);
         this.player.totalCharacters = Object.keys(this.characters).length;

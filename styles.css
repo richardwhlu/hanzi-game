@@ -242,20 +242,34 @@ body {
 
 /* Management screen */
 .manage-controls {
+    margin-bottom: calc(var(--pixel-unit) * 4);
+}
+
+.input-row {
     display: flex;
     gap: calc(var(--pixel-unit) * 2);
-    margin-bottom: calc(var(--pixel-unit) * 4);
+    margin-bottom: calc(var(--pixel-unit) * 2);
     flex-wrap: wrap;
 }
 
-#new-character-input {
+#new-character-input,
+#new-pinyin-input {
     padding: calc(var(--pixel-unit) * 2);
     border: var(--border-width) solid var(--gbc-dark-green);
     font-family: inherit;
     font-size: 16px;
     background: var(--gbc-lightest);
+    min-width: 150px;
+}
+
+#new-character-input {
     flex: 1;
-    min-width: 200px;
+    max-width: 120px;
+}
+
+#new-pinyin-input {
+    flex: 2;
+    max-width: 200px;
 }
 
 /* Phrase grid */

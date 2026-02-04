@@ -115,7 +115,10 @@
             <div id="manage-screen" class="screen">
                 <h2>Manage Characters</h2>
                 <div class="manage-controls">
-                    <input type="text" id="new-character-input" placeholder="Enter character (e.g., 你)" maxlength="1">
+                    <div class="input-row">
+                        <input type="text" id="new-character-input" placeholder="Character (e.g., 你)" maxlength="1">
+                        <input type="text" id="new-pinyin-input" placeholder="Pinyin (e.g., nǐ)" maxlength="10">
+                    </div>
                     <button id="add-char-btn" class="pixel-btn">Add Character</button>
                 </div>
                 <div id="manage-grid" class="character-grid">

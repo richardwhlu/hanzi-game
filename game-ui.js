@@ -39,6 +39,7 @@ class GameUI {
         
         // Management elements
         this.elements.newCharacterInput = document.getElementById('new-character-input');
+        this.elements.newPinyinInput = document.getElementById('new-pinyin-input');
         this.elements.phraseGrid = document.getElementById('available-phrases');
     }
     
@@ -65,6 +66,13 @@ class GameUI {
         
         // Allow Enter key to add characters
         this.elements.newCharacterInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.addNewCharacter();
+            }
+        });
+        
+        // Allow Enter key on pinyin input too
+        this.elements.newPinyinInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.addNewCharacter();
             }
@@ -281,6 +289,7 @@ class GameUI {
     // Add new character
     addNewCharacter() {
         const char = this.elements.newCharacterInput.value.trim();
+        const pinyin = this.elements.newPinyinInput.value.trim();
         
         if (!char) {
             this.showMessage('Please enter a character', 'error');
@@ -292,11 +301,18 @@ class GameUI {
             return;
         }
         
-        const result = this.game.addCharacter(char);
+        // Create character data with custom pinyin
+        const characterData = {};
+        if (pinyin) {
+            characterData.pinyin = pinyin;
+        }
+        
+        const result = this.game.addCharacter(char, characterData);
         
         if (result.success) {
             this.showMessage(result.message, 'success');
             this.elements.newCharacterInput.value = '';
+            this.elements.newPinyinInput.value = '';
             this.refreshManageGrid();
             
             if (result.newUnlocks && result.newUnlocks.length > 0) {
