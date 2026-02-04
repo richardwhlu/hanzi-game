@@ -123,7 +123,8 @@ class Character {
         let leveledUp = false;
         
         while (this.xp >= this.getXPForNextLevel()) {
-            this.xp -= this.getXPForNextLevel();
+            const xpNeeded = this.getXPForNextLevel(); // Get XP needed BEFORE leveling up
+            this.xp -= xpNeeded;
             this.level++;
             leveledUp = true;
             
@@ -271,7 +272,8 @@ class Player {
         let leveledUp = false;
         
         while (this.xp >= this.getXPForNextLevel()) {
-            this.xp -= this.getXPForNextLevel();
+            const xpNeeded = this.getXPForNextLevel(); // Get XP needed BEFORE leveling up
+            this.xp -= xpNeeded;
             this.level++;
             leveledUp = true;
         }
