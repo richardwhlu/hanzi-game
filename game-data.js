@@ -75,6 +75,10 @@ class Character {
         this.bestAccuracy = data.bestAccuracy || 0;
         this.unlocked = data.unlocked !== undefined ? data.unlocked : true;
         
+        // Phrase character properties
+        this.isPhraseCharacter = data.isPhraseCharacter || false;
+        this.originalPhrase = data.originalPhrase || null;
+        
         // Pokemon-style stats derived from character properties
         this.hp = this.calculateHP();
         this.attack = this.calculateAttack();
@@ -183,7 +187,9 @@ class Character {
             totalPractices: this.totalPractices,
             totalMistakes: this.totalMistakes,
             bestAccuracy: this.bestAccuracy,
-            unlocked: this.unlocked
+            unlocked: this.unlocked,
+            isPhraseCharacter: this.isPhraseCharacter,
+            originalPhrase: this.originalPhrase
         };
     }
 }
@@ -204,6 +210,7 @@ class Phrase {
         this.xp = data.xp || 0;
         this.unlocked = data.unlocked || false;
         this.totalPractices = data.totalPractices || 0;
+        this.firstTimeCompleted = data.firstTimeCompleted || false;
         
         // Calculate combined stats from component characters
         this.hp = this.calculateHP();
@@ -243,6 +250,50 @@ class Phrase {
         return baseDefense + frequencyBonus + levelBonus;
     }
     
+    // Record a phrase practice session
+    recordPractice() {
+        const isFirstCompletion = !this.firstTimeCompleted;
+        this.totalPractices++;
+        
+        // Mark as completed for first time if this is the first completion
+        if (isFirstCompletion) {
+            this.firstTimeCompleted = true;
+        }
+        
+        // Award XP for phrase completion (bonus for completing full sequences)
+        const baseXP = 25; // Base XP for phrase completion
+        const sequenceBonus = this.characters.length * 5; // Bonus for each character in sequence
+        const firstTimeBonus = isFirstCompletion ? 50 : 0; // Extra XP for first time completion
+        
+        const xpGained = baseXP + sequenceBonus + firstTimeBonus;
+        this.xp += xpGained;
+        
+        // Check for level up
+        let leveledUp = false;
+        const xpRequired = this.getXPForNextLevel();
+        if (this.xp >= xpRequired) {
+            this.xp -= xpRequired;
+            this.level++;
+            leveledUp = true;
+            
+            // Recalculate stats on level up
+            this.hp = this.calculateHP();
+            this.attack = this.calculateAttack();
+            this.defense = this.calculateDefense();
+        }
+        
+        return {
+            xpGained: xpGained,
+            leveledUp: leveledUp,
+            isFirstCompletion: isFirstCompletion
+        };
+    }
+    
+    // Get XP required for next level
+    getXPForNextLevel() {
+        return this.level * 150; // Phrases level slower than individual characters
+    }
+    
     toJSON() {
         return {
             text: this.text,
@@ -255,7 +306,8 @@ class Phrase {
             level: this.level,
             xp: this.xp,
             unlocked: this.unlocked,
-            totalPractices: this.totalPractices
+            totalPractices: this.totalPractices,
+            firstTimeCompleted: this.firstTimeCompleted
         };
     }
 }

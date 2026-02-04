@@ -15,6 +15,10 @@ class HanziGame {
             startTime: null
         };
         
+        // Phrase practice state
+        this.currentPhrase = null;
+        this.currentPhraseIndex = 0;
+        
         this.init();
     }
     
@@ -285,27 +289,57 @@ class HanziGame {
         // Check for new unlocks
         const newUnlocks = this.checkForNewUnlocks();
         
-        // Prepare completion data
-        const completionData = {
-            character: this.currentCharacter,
-            result: result,
-            playerLeveledUp: playerLeveledUp,
-            newUnlocks: newUnlocks,
-            sessionStats: {
-                completionTime: completionTime,
-                totalMistakes: this.currentMistakes,
-                accuracy: accuracy,
-                strokeCount: totalStrokes
-            }
-        };
-        
-        // Save progress
-        this.saveGame();
-        
-        // Trigger completion callback
-        this.onPracticeComplete && this.onPracticeComplete(completionData);
-        
-        return completionData;
+        // Check if we're in phrase practice mode
+        if (this.isPhrasePractice()) {
+            const phraseProgress = this.getPhraseProgress();
+            
+            // Prepare completion data for phrase character
+            const completionData = {
+                character: this.currentCharacter,
+                result: result,
+                playerLeveledUp: playerLeveledUp,
+                newUnlocks: newUnlocks,
+                sessionStats: {
+                    completionTime: completionTime,
+                    totalMistakes: this.currentMistakes,
+                    accuracy: accuracy,
+                    strokeCount: totalStrokes
+                },
+                phraseProgress: phraseProgress,
+                isPhrasePractice: true
+            };
+            
+            // Save progress
+            this.saveGame();
+            
+            // Trigger completion callback
+            this.onPracticeComplete && this.onPracticeComplete(completionData);
+            
+            return completionData;
+        } else {
+            // Regular character practice
+            const completionData = {
+                character: this.currentCharacter,
+                result: result,
+                playerLeveledUp: playerLeveledUp,
+                newUnlocks: newUnlocks,
+                sessionStats: {
+                    completionTime: completionTime,
+                    totalMistakes: this.currentMistakes,
+                    accuracy: accuracy,
+                    strokeCount: totalStrokes
+                },
+                isPhrasePractice: false
+            };
+            
+            // Save progress
+            this.saveGame();
+            
+            // Trigger completion callback
+            this.onPracticeComplete && this.onPracticeComplete(completionData);
+            
+            return completionData;
+        }
     }
     
     // Start quiz mode for current writer
@@ -335,6 +369,135 @@ class HanziGame {
             startTime: this.practiceStartTime
         };
         setTimeout(() => this.currentWriter.quiz(), 500);
+    }
+    
+    // Start a phrase practice sequence
+    startPhraseSequence(phrase) {
+        this.currentPhrase = phrase;
+        this.currentPhraseIndex = 0;
+        
+        // Start with the first character
+        if (phrase.characters.length > 0) {
+            const firstChar = phrase.characters[0];
+            return this.startPractice(firstChar);
+        }
+        
+        throw new Error('Phrase has no characters');
+    }
+    
+    // Check if we're currently practicing a phrase
+    isPhrasePractice() {
+        return this.currentPhrase !== null;
+    }
+    
+    // Get current phrase practice info
+    getPhraseProgress() {
+        if (!this.currentPhrase) return null;
+        
+        return {
+            phrase: this.currentPhrase,
+            currentIndex: this.currentPhraseIndex,
+            totalCharacters: this.currentPhrase.characters.length,
+            currentCharacter: this.currentPhrase.characters[this.currentPhraseIndex],
+            isLastCharacter: this.currentPhraseIndex === this.currentPhrase.characters.length - 1
+        };
+    }
+    
+    // Advance to next character in phrase sequence
+    advancePhraseSequence() {
+        if (!this.currentPhrase) return null;
+        
+        this.currentPhraseIndex++;
+        
+        if (this.currentPhraseIndex < this.currentPhrase.characters.length) {
+            // More characters to practice
+            const nextChar = this.currentPhrase.characters[this.currentPhraseIndex];
+            return this.startPractice(nextChar);
+        } else {
+            // Phrase completed
+            this.completePhraseSequence();
+            return null;
+        }
+    }
+    
+    // Complete phrase practice sequence
+    completePhraseSequence() {
+        if (!this.currentPhrase) return;
+        
+        // Award bonus XP for completing full phrase
+        const bonusXP = this.currentPhrase.characters.length * 10;
+        const playerLeveledUp = this.player.addXP(bonusXP);
+        
+        // Record phrase completion and check if it's first time
+        const practiceResult = this.currentPhrase.recordPractice();
+        
+        const completionData = {
+            phrase: this.currentPhrase,
+            bonusXP: bonusXP,
+            playerLeveledUp: playerLeveledUp,
+            isFirstCompletion: practiceResult.isFirstCompletion
+        };
+        
+        // If this is the first time completing the phrase, add it as a character
+        if (practiceResult.isFirstCompletion) {
+            this.createPhraseCharacter(this.currentPhrase);
+        } else {
+            // If phrase character already exists, give it XP too
+            const phraseCharacter = this.characters[this.currentPhrase.text];
+            if (phraseCharacter && phraseCharacter.isPhraseCharacter) {
+                const phraseXP = Math.floor(bonusXP / 2); // Give phrase character half the bonus XP
+                const phraseLeveledUp = phraseCharacter.addXP(phraseXP);
+                completionData.phraseCharacterXP = phraseXP;
+                completionData.phraseCharacterLeveledUp = phraseLeveledUp;
+            }
+        }
+        
+        // Reset phrase state
+        this.currentPhrase = null;
+        this.currentPhraseIndex = 0;
+        
+        // Save progress
+        this.saveGame();
+        
+        // Trigger phrase completion callback
+        this.onPhraseComplete && this.onPhraseComplete(completionData);
+        
+        return completionData;
+    }
+    
+    // Create a character representation of a completed phrase
+    createPhraseCharacter(phrase) {
+        // Check if phrase character already exists
+        if (this.characters[phrase.text]) {
+            console.log(`Phrase character ${phrase.text} already exists`);
+            return this.characters[phrase.text];
+        }
+        
+        // Create character data based on the phrase
+        const phraseCharacterData = {
+            pinyin: phrase.pinyin,
+            strokes: phrase.characters.reduce((total, charText) => {
+                const char = this.characters[charText];
+                return total + (char ? char.strokes : 5); // fallback to 5 if character not found
+            }, 0),
+            difficulty: phrase.difficulty,
+            frequency: phrase.frequency,
+            level: 1, // Start at level 1
+            xp: 0,
+            totalPractices: 0,
+            totalMistakes: 0,
+            bestAccuracy: 0,
+            unlocked: true,
+            isPhraseCharacter: true, // Mark this as a phrase-based character
+            originalPhrase: phrase.text
+        };
+        
+        // Add the phrase as a character using its text as the key
+        this.characters[phrase.text] = new Character(phrase.text, phraseCharacterData);
+        this.player.totalCharacters = Object.keys(this.characters).length;
+        
+        console.log(`Created phrase character: ${phrase.text}`);
+        return this.characters[phrase.text];
     }
     
     // Get available characters for practice
@@ -447,5 +610,208 @@ class HanziGame {
             totalPracticeTime: Math.floor(this.player.totalPracticeTime / 1000), // in seconds
             achievements: this.player.achievements.length
         };
+    }
+    
+    // BATTLE SYSTEM METHODS
+    
+    // Generate a wild character/phrase for battle
+    generateWildOpponent() {
+        // Get all possible characters and phrases from defaults that player doesn't have
+        const wildCharacters = [];
+        const wildPhrases = [];
+        
+        // Find characters from DEFAULT_CHARACTERS that player doesn't have
+        for (const [char, data] of Object.entries(DEFAULT_CHARACTERS)) {
+            if (!this.characters[char]) {
+                wildCharacters.push({ char, ...data, isWild: true });
+            }
+        }
+        
+        // Find phrases from DEFAULT_PHRASES that player doesn't have unlocked
+        for (const [text, data] of Object.entries(DEFAULT_PHRASES)) {
+            if (!this.phrases[text] || !this.phrases[text].unlocked) {
+                wildPhrases.push({ text, ...data, isWild: true, isPhrase: true });
+            }
+        }
+        
+        // Combine all possible opponents
+        const allOpponents = [...wildCharacters, ...wildPhrases];
+        
+        if (allOpponents.length === 0) {
+            // If no wild opponents available, generate a random strong character
+            return this.generateRandomOpponent();
+        }
+        
+        // Pick a random opponent
+        const randomIndex = Math.floor(Math.random() * allOpponents.length);
+        const opponent = allOpponents[randomIndex];
+        
+        // Create battle-ready opponent with stats
+        return this.createBattleOpponent(opponent);
+    }
+    
+    // Create a battle-ready opponent from character/phrase data
+    createBattleOpponent(opponentData) {
+        let battleOpponent;
+        
+        if (opponentData.isPhrase) {
+            // Create phrase opponent
+            battleOpponent = {
+                name: opponentData.text,
+                pinyin: opponentData.pinyin,
+                meaning: opponentData.meaning,
+                isPhrase: true,
+                isWild: true,
+                // Calculate combined stats from component characters
+                strokes: opponentData.characters ? 
+                    opponentData.characters.reduce((total, char) => {
+                        const charData = DEFAULT_CHARACTERS[char];
+                        return total + (charData ? charData.strokes : 5);
+                    }, 0) : 10, // fallback
+                difficulty: opponentData.difficulty,
+                frequency: opponentData.frequency,
+                originalData: opponentData
+            };
+        } else {
+            // Create character opponent
+            battleOpponent = {
+                name: opponentData.char,
+                pinyin: opponentData.pinyin,
+                strokes: opponentData.strokes,
+                difficulty: opponentData.difficulty,
+                frequency: opponentData.frequency,
+                isPhrase: false,
+                isWild: true,
+                originalData: opponentData
+            };
+        }
+        
+        // Calculate battle stats
+        battleOpponent.maxHP = this.calculateOpponentHP(battleOpponent);
+        battleOpponent.currentHP = battleOpponent.maxHP;
+        battleOpponent.attack = this.calculateOpponentAttack(battleOpponent);
+        battleOpponent.defense = this.calculateOpponentDefense(battleOpponent);
+        battleOpponent.level = this.calculateOpponentLevel(battleOpponent);
+        
+        return battleOpponent;
+    }
+    
+    // Generate a random strong opponent when no wild ones available
+    generateRandomOpponent() {
+        const randomChars = ['龙', '凤', '麒', '麟', '神', '魔', '仙', '妖'];
+        const randomChar = randomChars[Math.floor(Math.random() * randomChars.length)];
+        
+        return this.createBattleOpponent({
+            char: randomChar,
+            pinyin: 'mystery',
+            strokes: 15 + Math.floor(Math.random() * 10), // 15-25 strokes
+            difficulty: 4 + Math.floor(Math.random() * 2), // difficulty 4-5
+            frequency: 20 + Math.floor(Math.random() * 30), // frequency 20-50
+            isWild: true
+        });
+    }
+    
+    // Calculate opponent stats based on player's average level
+    calculateOpponentHP(opponent) {
+        const playerAvgLevel = this.getPlayerAverageLevel();
+        const baseHP = opponent.isPhrase ? 80 : 50;
+        const strokeBonus = opponent.strokes * 4;
+        const levelVariation = Math.floor(Math.random() * 10) - 5; // ±5 levels
+        const effectiveLevel = Math.max(1, playerAvgLevel + levelVariation);
+        const levelBonus = effectiveLevel * 8;
+        
+        return baseHP + strokeBonus + levelBonus;
+    }
+    
+    calculateOpponentAttack(opponent) {
+        const playerAvgLevel = this.getPlayerAverageLevel();
+        const baseAttack = opponent.isPhrase ? 25 : 15;
+        const difficultyBonus = opponent.difficulty * 3;
+        const levelBonus = playerAvgLevel * 2;
+        
+        return baseAttack + difficultyBonus + levelBonus;
+    }
+    
+    calculateOpponentDefense(opponent) {
+        const playerAvgLevel = this.getPlayerAverageLevel();
+        const baseDefense = opponent.isPhrase ? 20 : 12;
+        const frequencyBonus = Math.floor(opponent.frequency / 20);
+        const levelBonus = playerAvgLevel * 2;
+        
+        return baseDefense + frequencyBonus + levelBonus;
+    }
+    
+    calculateOpponentLevel(opponent) {
+        const playerAvgLevel = this.getPlayerAverageLevel();
+        const variation = Math.floor(Math.random() * 6) - 3; // ±3 levels
+        return Math.max(1, playerAvgLevel + variation);
+    }
+    
+    // Get player's average character level
+    getPlayerAverageLevel() {
+        const characters = Object.values(this.characters);
+        if (characters.length === 0) return 1;
+        
+        const totalLevel = characters.reduce((sum, char) => sum + char.level, 0);
+        return Math.floor(totalLevel / characters.length);
+    }
+    
+    // Execute battle turn (player attacks enemy)
+    executeBattleTurn(playerCharacter, enemy) {
+        // Calculate damage: attack - defense, minimum 1
+        const baseDamage = Math.max(1, playerCharacter.attack - enemy.defense);
+        const variation = Math.floor(Math.random() * 6) - 2; // ±2 damage variation
+        const damage = Math.max(1, baseDamage + variation);
+        
+        // Apply damage
+        enemy.currentHP = Math.max(0, enemy.currentHP - damage);
+        
+        const result = {
+            damage: damage,
+            enemyDefeated: enemy.currentHP === 0,
+            playerAttack: true
+        };
+        
+        return result;
+    }
+    
+    // Execute enemy counter-attack
+    executeEnemyTurn(enemy, playerCharacter) {
+        if (enemy.currentHP === 0) return null; // Dead enemies can't attack
+        
+        // Calculate damage: attack - defense, minimum 1
+        const baseDamage = Math.max(1, enemy.attack - playerCharacter.defense);
+        const variation = Math.floor(Math.random() * 6) - 2; // ±2 damage variation
+        const damage = Math.max(1, baseDamage + variation);
+        
+        // Apply damage (but don't modify the original character, create battle state)
+        const result = {
+            damage: damage,
+            enemyAttack: true
+        };
+        
+        return result;
+    }
+    
+    // Add defeated opponent to player's collection
+    addDefeatedOpponent(opponent) {
+        if (opponent.isPhrase) {
+            // Add phrase to collection if not already there
+            if (!this.phrases[opponent.name]) {
+                this.phrases[opponent.name] = new Phrase(opponent.name, opponent.originalData);
+            }
+            // Unlock the phrase
+            this.phrases[opponent.name].unlocked = true;
+            this.player.totalPhrases++;
+            
+            return { type: 'phrase', name: opponent.name };
+        } else {
+            // Add character to collection if not already there
+            if (!this.characters[opponent.name]) {
+                const result = this.addCharacter(opponent.name, opponent.originalData);
+                return { type: 'character', name: opponent.name, success: result.success };
+            }
+            return { type: 'character', name: opponent.name, success: false, message: 'Already owned' };
+        }
     }
 }

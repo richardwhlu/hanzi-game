@@ -384,3 +384,240 @@ body {
     margin-top: calc(var(--pixel-unit) * 4);
     font-weight: bold;
 }
+
+/* Phrase character styles */
+.character-card.phrase-character {
+    background: linear-gradient(135deg, var(--gbc-yellow), var(--gbc-light-green));
+    border-color: var(--gbc-purple);
+    box-shadow: 0 calc(var(--pixel-unit) / 2) calc(var(--pixel-unit) * 2) rgba(139, 0, 139, 0.3);
+}
+
+.character-card.phrase-character:hover {
+    background: linear-gradient(135deg, var(--gbc-light-green), var(--gbc-yellow));
+    transform: translateY(-2px);
+    box-shadow: 0 calc(var(--pixel-unit)) calc(var(--pixel-unit) * 3) rgba(139, 0, 139, 0.4);
+}
+
+.character-card.phrase-character .character-display {
+    background: linear-gradient(45deg, var(--gbc-purple), var(--gbc-blue));
+    color: var(--gbc-lightest);
+    text-shadow: 1px 1px 0 var(--gbc-dark-green);
+    border: 2px solid var(--gbc-yellow);
+}
+
+/* Battle system styles */
+.battle-btn {
+    background: linear-gradient(135deg, var(--gbc-red), var(--gbc-purple));
+    color: var(--gbc-lightest);
+    border-color: var(--gbc-red);
+    font-weight: bold;
+}
+
+.battle-btn:hover {
+    background: linear-gradient(135deg, var(--gbc-purple), var(--gbc-red));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 20, 60, 0.3);
+}
+
+.battle-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: calc(var(--pixel-unit) * 5) 0;
+    padding: calc(var(--pixel-unit) * 4);
+    border: var(--border-width) solid var(--gbc-dark-green);
+    background: var(--gbc-bg);
+}
+
+.battle-side {
+    flex: 1;
+    text-align: center;
+    padding: calc(var(--pixel-unit) * 2);
+}
+
+.battle-vs {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 calc(var(--pixel-unit) * 4);
+}
+
+.vs-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--gbc-red);
+    margin-bottom: calc(var(--pixel-unit) * 2);
+    text-shadow: 2px 2px 0 var(--gbc-shadow);
+}
+
+.attack-btn {
+    background: var(--gbc-red);
+    color: var(--gbc-lightest);
+    font-weight: bold;
+    font-size: 18px;
+    padding: calc(var(--pixel-unit) * 2) calc(var(--pixel-unit) * 3);
+}
+
+.attack-btn:hover {
+    background: var(--gbc-purple);
+    animation: glow 1s infinite;
+}
+
+.attack-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+    animation: none;
+}
+
+.battle-character {
+    border: var(--border-width) solid var(--gbc-dark-green);
+    background: var(--gbc-lightest);
+    padding: calc(var(--pixel-unit) * 3);
+    margin: calc(var(--pixel-unit) * 2) auto;
+    border-radius: calc(var(--pixel-unit));
+    max-width: 250px;
+}
+
+.battle-character .character-name {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: calc(var(--pixel-unit) * 2);
+    color: var(--gbc-dark-green);
+}
+
+.battle-character .character-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: calc(var(--pixel-unit)) 0;
+    font-size: 14px;
+}
+
+.battle-character .hp-bar {
+    background: #ddd;
+    height: 8px;
+    border-radius: 4px;
+    margin: calc(var(--pixel-unit)) 0;
+    overflow: hidden;
+}
+
+.battle-character .hp-fill {
+    background: linear-gradient(90deg, var(--gbc-green), var(--gbc-light-green));
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.battle-character.enemy {
+    border-color: var(--gbc-red);
+}
+
+.battle-character.enemy .character-name {
+    color: var(--gbc-red);
+}
+
+.battle-character.enemy .hp-fill {
+    background: linear-gradient(90deg, var(--gbc-red), var(--gbc-yellow));
+}
+
+.character-team {
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--pixel-unit) * 2);
+    margin-top: calc(var(--pixel-unit) * 3);
+    flex-wrap: wrap;
+}
+
+.team-character {
+    border: 2px solid var(--gbc-dark-green);
+    background: var(--gbc-lightest);
+    padding: calc(var(--pixel-unit));
+    border-radius: calc(var(--pixel-unit) / 2);
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    min-width: 50px;
+    text-align: center;
+}
+
+.team-character:hover {
+    background: var(--gbc-light-green);
+    transform: translateY(-2px);
+}
+
+.team-character.active {
+    border-color: var(--gbc-blue);
+    background: var(--gbc-blue);
+    color: var(--gbc-lightest);
+}
+
+.team-character.defeated {
+    opacity: 0.5;
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.battle-log {
+    background: var(--gbc-lightest);
+    border: var(--border-width) solid var(--gbc-dark-green);
+    margin: calc(var(--pixel-unit) * 3) 0;
+    border-radius: calc(var(--pixel-unit));
+}
+
+.battle-log h4 {
+    background: var(--gbc-green);
+    color: var(--gbc-lightest);
+    margin: 0;
+    padding: calc(var(--pixel-unit) * 2);
+    text-align: center;
+}
+
+.battle-messages {
+    height: 120px;
+    overflow-y: auto;
+    padding: calc(var(--pixel-unit) * 2);
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.battle-message {
+    margin: calc(var(--pixel-unit) / 2) 0;
+    padding: calc(var(--pixel-unit) / 2);
+}
+
+.battle-message.damage {
+    color: var(--gbc-red);
+    font-weight: bold;
+}
+
+.battle-message.heal {
+    color: var(--gbc-green);
+    font-weight: bold;
+}
+
+.battle-message.victory {
+    color: var(--gbc-blue);
+    font-weight: bold;
+}
+
+.battle-message.defeat {
+    color: var(--gbc-purple);
+    font-weight: bold;
+}
+
+.battle-controls {
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--pixel-unit) * 3);
+    margin-top: calc(var(--pixel-unit) * 3);
+}
+
+@keyframes battle-hit {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.battle-character.hit-animation {
+    animation: battle-hit 0.5s ease-in-out;
+}

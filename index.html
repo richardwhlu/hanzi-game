@@ -57,6 +57,7 @@
                 </div>
             </div>
             <div class="game-controls">
+                <button id="battle-btn" class="pixel-btn battle-btn" title="Battle wild characters and phrases!">⚔️ Battle</button>
                 <button id="save-btn" class="pixel-btn" title="Save to browser (auto-saves anyway)">Save</button>
                 <button id="export-btn" class="pixel-btn" title="Download backup file">Export</button>
                 <button id="load-btn" class="pixel-btn" title="Load from backup file">Load</button>
@@ -135,6 +136,53 @@
                     <!-- Available phrase combinations will appear here -->
                 </div>
                 <button id="back-from-evolution" class="pixel-btn">Back</button>
+            </div>
+
+            <!-- Battle screen -->
+            <div id="battle-screen" class="screen">
+                <h2>Battle Arena</h2>
+                
+                <!-- Battle area -->
+                <div class="battle-area">
+                    <!-- Player side -->
+                    <div class="battle-side player-side">
+                        <h3>Your Character</h3>
+                        <div id="player-character" class="battle-character">
+                            <!-- Player character will be displayed here -->
+                        </div>
+                        <div id="player-team" class="character-team">
+                            <!-- Other available characters for switching -->
+                        </div>
+                    </div>
+
+                    <!-- VS indicator -->
+                    <div class="battle-vs">
+                        <div class="vs-text">VS</div>
+                        <button id="attack-btn" class="pixel-btn attack-btn">Attack!</button>
+                    </div>
+
+                    <!-- Enemy side -->
+                    <div class="battle-side enemy-side">
+                        <h3>Wild Character</h3>
+                        <div id="enemy-character" class="battle-character">
+                            <!-- Enemy character will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Battle log -->
+                <div class="battle-log">
+                    <h4>Battle Log</h4>
+                    <div id="battle-messages" class="battle-messages">
+                        <!-- Battle messages will appear here -->
+                    </div>
+                </div>
+
+                <!-- Battle controls -->
+                <div class="battle-controls">
+                    <button id="battle-back-btn" class="pixel-btn">← Back to Practice</button>
+                    <button id="find-opponent-btn" class="pixel-btn">Find New Opponent</button>
+                </div>
             </div>
         </main>
     </div>
