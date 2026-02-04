@@ -1,0 +1,10 @@
+# javascript chinese-characters stroke-tracking learning-analytics
+Hanzi Writer Library Research Summary - This library focuses primarily on stroke order practice rather than comprehensive learning analytics. Key findings:
+1. Limited built-in proficiency system - only basic mistake counting
+2. No built-in leveling or progression tracking
+3. Event callbacks: onMistake, onCorrectStroke, onComplete
+4. Custom stroke evaluation via leniency and other parameters
+5. StrokeData provides: character, strokeNum, mistakesOnStroke, totalMistakes, strokesRemaining, drawnPath, isBackwards
+6. Main evaluation criteria: distance threshold, shape matching, direction matching, length matching
+7. Developers must build their own analytics on top of the basic tracking
+

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanzi Creatures - Learn Chinese Characters</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@4/dist/hanzi-writer.min.js"></script>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header with stats -->
+        <header class="game-header">
+            <div class="player-stats">
+                <div class="stat">
+                    <span class="stat-label">Level:</span>
+                    <span id="player-level">1</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">XP:</span>
+                    <span id="player-xp">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Characters:</span>
+                    <span id="character-count">0</span>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button id="save-btn" class="pixel-btn">Save</button>
+                <button id="load-btn" class="pixel-btn">Load</button>
+                <button id="manage-btn" class="pixel-btn">Manage</button>
+            </div>
+        </header>
+
+        <!-- Main game area -->
+        <main class="game-main">
+            <!-- Character selection screen -->
+            <div id="character-select" class="screen active">
+                <h2>Choose a Character to Practice</h2>
+                <div id="character-grid" class="character-grid">
+                    <!-- Characters will be dynamically loaded here -->
+                </div>
+                <button id="add-character-btn" class="pixel-btn">Add New Character</button>
+            </div>
+
+            <!-- Practice screen -->
+            <div id="practice-screen" class="screen">
+                <div class="practice-header">
+                    <button id="back-btn" class="pixel-btn">← Back</button>
+                    <div class="current-character-info">
+                        <h3 id="current-character-name">你</h3>
+                        <div class="character-stats">
+                            <span>Level: <span id="char-level">1</span></span>
+                            <span>XP: <span id="char-xp">0</span>/100</span>
+                            <span>HP: <span id="char-hp">20</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="practice-area">
+                    <!-- Hanzi writing area -->
+                    <div id="hanzi-writer" class="hanzi-container"></div>
+                    
+                    <!-- Practice controls -->
+                    <div class="practice-controls">
+                        <button id="hint-btn" class="pixel-btn">Show Hint</button>
+                        <button id="reset-btn" class="pixel-btn">Reset</button>
+                        <button id="next-btn" class="pixel-btn">Next Practice</button>
+                    </div>
+                </div>
+
+                <!-- XP feedback -->
+                <div id="xp-feedback" class="xp-feedback hidden">
+                    <div class="xp-gained">+<span id="xp-amount">0</span> XP!</div>
+                    <div class="accuracy">Accuracy: <span id="accuracy-percent">0</span>%</div>
+                </div>
+            </div>
+
+            <!-- Character management screen -->
+            <div id="manage-screen" class="screen">
+                <h2>Manage Characters</h2>
+                <div class="manage-controls">
+                    <input type="text" id="new-character-input" placeholder="Enter character (e.g., 你)" maxlength="1">
+                    <button id="add-char-btn" class="pixel-btn">Add Character</button>
+                </div>
+                <div id="manage-grid" class="character-grid">
+                    <!-- Managed characters will appear here -->
+                </div>
+                <button id="back-to-select" class="pixel-btn">Back to Game</button>
+            </div>
+
+            <!-- Evolution/Phrase screen -->
+            <div id="evolution-screen" class="screen">
+                <h2>Create Phrases</h2>
+                <div id="available-phrases" class="phrase-grid">
+                    <!-- Available phrase combinations will appear here -->
+                </div>
+                <button id="back-from-evolution" class="pixel-btn">Back</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="game-data.js"></script>
+    <script src="game-engine.js"></script>
+    <script src="game-ui.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

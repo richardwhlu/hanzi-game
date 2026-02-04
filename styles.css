@@ -1,0 +1,359 @@
+/* Game Boy Color Inspired Styles */
+:root {
+    /* Game Boy Color palette */
+    --gbc-green: #8bac0f;
+    --gbc-dark-green: #306230;
+    --gbc-light-green: #9bbc0f;
+    --gbc-lightest: #ffffff;
+    --gbc-blue: #4169e1;
+    --gbc-red: #dc143c;
+    --gbc-yellow: #ffd700;
+    --gbc-purple: #8b008b;
+    --gbc-bg: #f0f8e8;
+    --gbc-shadow: #2e4a2e;
+    
+    /* Spacing and sizing */
+    --pixel-unit: 4px;
+    --border-width: 2px;
+}
+
+/* Base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: var(--gbc-bg);
+    color: var(--gbc-dark-green);
+    line-height: 1.4;
+    image-rendering: pixelated;
+}
+
+.game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--gbc-lightest);
+    border: calc(var(--border-width) * 2) solid var(--gbc-dark-green);
+    box-shadow: calc(var(--pixel-unit) * 2) calc(var(--pixel-unit) * 2) 0 var(--gbc-shadow);
+}
+
+/* Header styles */
+.game-header {
+    background: var(--gbc-green);
+    padding: var(--pixel-unit);
+    border-bottom: var(--border-width) solid var(--gbc-dark-green);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.player-stats {
+    display: flex;
+    gap: calc(var(--pixel-unit) * 4);
+    flex-wrap: wrap;
+}
+
+.stat {
+    background: var(--gbc-lightest);
+    padding: var(--pixel-unit);
+    border: var(--border-width) solid var(--gbc-dark-green);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.stat-label {
+    color: var(--gbc-dark-green);
+}
+
+.game-controls {
+    display: flex;
+    gap: var(--pixel-unit);
+}
+
+/* Pixel button styles */
+.pixel-btn {
+    background: var(--gbc-lightest);
+    color: var(--gbc-dark-green);
+    border: var(--border-width) solid var(--gbc-dark-green);
+    padding: calc(var(--pixel-unit) * 2) calc(var(--pixel-unit) * 3);
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.1s ease;
+}
+
+.pixel-btn:hover {
+    background: var(--gbc-light-green);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--gbc-shadow);
+}
+
+.pixel-btn:active {
+    transform: translate(0, 0);
+    box-shadow: 1px 1px 0 var(--gbc-shadow);
+}
+
+/* Screen management */
+.game-main {
+    padding: calc(var(--pixel-unit) * 4);
+    min-height: calc(100vh - 80px);
+}
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* Character grid */
+.character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: calc(var(--pixel-unit) * 3);
+    margin: calc(var(--pixel-unit) * 4) 0;
+}
+
+.character-card {
+    background: var(--gbc-lightest);
+    border: var(--border-width) solid var(--gbc-dark-green);
+    padding: calc(var(--pixel-unit) * 3);
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.character-card:hover {
+    background: var(--gbc-light-green);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--gbc-shadow);
+}
+
+.character-display {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: calc(var(--pixel-unit) * 2);
+    color: var(--gbc-dark-green);
+}
+
+.character-info {
+    font-size: 12px;
+    color: var(--gbc-dark-green);
+}
+
+.character-level {
+    background: var(--gbc-blue);
+    color: var(--gbc-lightest);
+    padding: 2px calc(var(--pixel-unit) * 2);
+    border-radius: calc(var(--pixel-unit) * 2);
+    margin-top: calc(var(--pixel-unit));
+    display: inline-block;
+}
+
+/* Practice screen */
+.practice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: calc(var(--pixel-unit) * 4);
+    flex-wrap: wrap;
+}
+
+.current-character-info h3 {
+    font-size: 32px;
+    color: var(--gbc-dark-green);
+    margin-bottom: calc(var(--pixel-unit));
+}
+
+.character-stats {
+    display: flex;
+    gap: calc(var(--pixel-unit) * 3);
+    font-size: 14px;
+    flex-wrap: wrap;
+}
+
+.character-stats span {
+    background: var(--gbc-lightest);
+    padding: 2px calc(var(--pixel-unit));
+    border: 1px solid var(--gbc-dark-green);
+}
+
+/* Hanzi writing area */
+.practice-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--pixel-unit) * 4);
+}
+
+.hanzi-container {
+    background: var(--gbc-lightest);
+    border: calc(var(--border-width) * 2) solid var(--gbc-dark-green);
+    padding: calc(var(--pixel-unit) * 2);
+    border-radius: calc(var(--pixel-unit));
+}
+
+.practice-controls {
+    display: flex;
+    gap: calc(var(--pixel-unit) * 2);
+    flex-wrap: wrap;
+}
+
+/* XP Feedback */
+.xp-feedback {
+    margin-top: calc(var(--pixel-unit) * 4);
+    padding: calc(var(--pixel-unit) * 3);
+    background: var(--gbc-green);
+    border: var(--border-width) solid var(--gbc-dark-green);
+    text-align: center;
+    animation: xp-bounce 0.6s ease-out;
+}
+
+.xp-feedback.hidden {
+    display: none;
+}
+
+.xp-gained {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--gbc-yellow);
+    text-shadow: 1px 1px 0 var(--gbc-dark-green);
+    margin-bottom: calc(var(--pixel-unit));
+}
+
+.accuracy {
+    font-size: 16px;
+    color: var(--gbc-lightest);
+}
+
+@keyframes xp-bounce {
+    0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+    50% { transform: scale(1.1) translateY(-10px); opacity: 1; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Management screen */
+.manage-controls {
+    display: flex;
+    gap: calc(var(--pixel-unit) * 2);
+    margin-bottom: calc(var(--pixel-unit) * 4);
+    flex-wrap: wrap;
+}
+
+#new-character-input {
+    padding: calc(var(--pixel-unit) * 2);
+    border: var(--border-width) solid var(--gbc-dark-green);
+    font-family: inherit;
+    font-size: 16px;
+    background: var(--gbc-lightest);
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Phrase grid */
+.phrase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: calc(var(--pixel-unit) * 3);
+    margin: calc(var(--pixel-unit) * 4) 0;
+}
+
+.phrase-card {
+    background: var(--gbc-purple);
+    color: var(--gbc-lightest);
+    border: var(--border-width) solid var(--gbc-dark-green);
+    padding: calc(var(--pixel-unit) * 3);
+    text-align: center;
+    cursor: pointer;
+}
+
+.phrase-card:hover {
+    background: var(--gbc-red);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--gbc-shadow);
+}
+
+.phrase-display {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: calc(var(--pixel-unit) * 2);
+}
+
+.phrase-requirements {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* Level up animation */
+@keyframes level-up {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: var(--gbc-yellow); }
+    100% { transform: scale(1); }
+}
+
+.level-up {
+    animation: level-up 1s ease-out;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .game-header {
+        flex-direction: column;
+        gap: calc(var(--pixel-unit) * 2);
+        text-align: center;
+    }
+    
+    .character-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .practice-header {
+        flex-direction: column;
+        gap: calc(var(--pixel-unit) * 2);
+    }
+    
+    .character-stats {
+        justify-content: center;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: "...";
+    animation: loading-dots 1s infinite;
+}
+
+@keyframes loading-dots {
+    0%, 20% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Success/error states */
+.success {
+    background: var(--gbc-green) !important;
+    color: var(--gbc-lightest) !important;
+}
+
+.error {
+    background: var(--gbc-red) !important;
+    color: var(--gbc-lightest) !important;
+}
+
+/* Hidden utility */
+.hidden {
+    display: none !important;
+}
