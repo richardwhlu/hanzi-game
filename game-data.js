@@ -113,8 +113,16 @@ class Character {
     // Get current accuracy percentage
     getAccuracy() {
         if (this.totalPractices === 0) return 0;
-        const correctPractices = Math.max(0, this.totalPractices - this.totalMistakes);
-        return Math.floor((correctPractices / this.totalPractices) * 100);
+        
+        // Calculate accuracy based on total stroke attempts vs successful strokes
+        // Each practice session involves multiple strokes, so we need to be more sophisticated
+        const estimatedTotalStrokes = this.totalPractices * this.strokes; // rough estimate
+        const estimatedCorrectStrokes = Math.max(0, estimatedTotalStrokes - this.totalMistakes);
+        
+        // Ensure accuracy doesn't go below 0 or above 100
+        const accuracy = Math.min(100, Math.max(0, Math.floor((estimatedCorrectStrokes / estimatedTotalStrokes) * 100)));
+        
+        return accuracy;
     }
     
     // Add XP and handle level ups

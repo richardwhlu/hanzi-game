@@ -239,9 +239,35 @@ class HanziGame {
         if (!this.currentCharacter) return;
         
         const completionTime = Date.now() - this.practiceStartTime;
+        
+        // Calculate accuracy based on total attempts vs mistakes
+        // More reliable method using HanziWriter's summary data
         const totalStrokes = this.sessionData.strokes.length;
-        const totalAttempts = this.sessionData.strokes.reduce((sum, stroke) => sum + stroke.attemptsNeeded, 0);
-        const accuracy = totalStrokes > 0 ? Math.floor((totalStrokes / totalAttempts) * 100) : 0;
+        const totalMistakes = this.currentMistakes;
+        
+        // If we have stroke data, use our detailed calculation
+        let accuracy = 0;
+        if (totalStrokes > 0) {
+            const totalAttempts = this.sessionData.strokes.reduce((sum, stroke) => sum + stroke.attemptsNeeded, 0);
+            accuracy = Math.floor((totalStrokes / totalAttempts) * 100);
+        } else if (summary && 'totalMistakes' in summary) {
+            // Fallback: estimate from HanziWriter's summary
+            // Assume the character was completed, so we know total strokes attempted
+            const estimatedStrokes = this.currentCharacter.strokes || 5; // fallback to 5
+            const totalAttempts = estimatedStrokes + totalMistakes;
+            accuracy = totalAttempts > 0 ? Math.floor((estimatedStrokes / totalAttempts) * 100) : 0;
+        } else {
+            // Last resort: base on mistakes vs time (rough estimate)
+            accuracy = Math.max(0, Math.min(100, 100 - (totalMistakes * 10)));
+        }
+        
+        console.log('Practice completed:', {
+            totalStrokes,
+            totalMistakes,
+            accuracy,
+            strokesData: this.sessionData.strokes.length,
+            summary
+        });
         
         // Record the practice session
         const result = this.currentCharacter.recordPractice(
