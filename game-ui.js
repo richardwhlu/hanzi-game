@@ -709,7 +709,9 @@ class GameUI {
         const element = side === 'player' ? this.elements.playerBattleCharacter : this.elements.enemyBattleCharacter;
         const isEnemy = side === 'enemy';
         
-        const hpPercentage = (character.currentHP / character.maxHP) * 100;
+        // For player characters, maxHP is stored in 'hp' property. For enemies, it's in 'maxHP'
+        const maxHP = character.maxHP || character.hp;
+        const hpPercentage = (character.currentHP / maxHP) * 100;
         
         element.innerHTML = `
             <div class="character-name">${character.name || character.char}</div>
@@ -721,7 +723,7 @@ class GameUI {
             <div class="hp-bar">
                 <div class="hp-fill" style="width: ${hpPercentage}%"></div>
             </div>
-            <div class="hp-text">${character.currentHP}/${character.maxHP} HP</div>
+            <div class="hp-text">${character.currentHP}/${maxHP} HP</div>
             <div class="character-info">
                 <strong>${character.pinyin}</strong>
                 ${isEnemy ? '' : `<br>Accuracy: ${character.getAccuracy ? character.getAccuracy() : 0}%`}

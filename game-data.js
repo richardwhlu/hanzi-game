@@ -11,7 +11,12 @@ const DEFAULT_CHARACTERS = {
     '不': { pinyin: 'bù', strokes: 4, difficulty: 1, frequency: 92 },
     '在': { pinyin: 'zài', strokes: 6, difficulty: 2, frequency: 85 },
     '了': { pinyin: 'le', strokes: 2, difficulty: 1, frequency: 96 },
-    '有': { pinyin: 'yǒu', strokes: 6, difficulty: 2, frequency: 89 }
+    '有': { pinyin: 'yǒu', strokes: 6, difficulty: 2, frequency: 89 },
+    '戴': { pinyin: 'dài', strokes: 17, difficulty: 4, frequency: 80 },
+    '吃': { pinyin: 'chī', strokes: 6, difficulty: 1, frequency: 85 },
+    '喝': { pinyin: 'hē', strokes: 12, difficulty: 2, frequency: 85 },
+    '夠': { pinyin: 'gòu', strokes: 11, difficulty: 4, frequency: 80 },
+    '麵': { pinyin: 'miàn', strokes: 20, difficulty: 4, frequency: 80 }
 };
 
 // Default phrase combinations with requirements
@@ -96,7 +101,7 @@ class Character {
     // Calculate Attack based on frequency and level
     calculateAttack() {
         const baseAttack = 10;
-        const frequencyBonus = Math.floor(this.frequency / 10);
+        const frequencyBonus = 10 - Math.floor(this.frequency / 10);
         const levelBonus = (this.level - 1) * 2;
         return baseAttack + frequencyBonus + levelBonus;
     }
