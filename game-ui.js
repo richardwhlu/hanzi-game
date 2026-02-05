@@ -67,6 +67,16 @@ class GameUI {
         this.elements.modalCharacterGrid = document.getElementById('modal-character-grid');
         this.elements.modalClose = document.getElementById('modal-close');
 
+        // Team selection modal elements
+        this.elements.teamSelectionModal = document.getElementById('team-selection-modal');
+        this.elements.availableCharactersList = document.getElementById('available-team-grid');
+        this.elements.selectedTeamList = document.getElementById('selected-team-grid');
+        this.elements.selectedCount = document.getElementById('selected-count');
+        this.elements.maxCount = document.getElementById('max-count');
+        this.elements.startBattleBtn = document.getElementById('start-battle-btn');
+        this.elements.cancelTeamBtn = document.getElementById('cancel-team-btn');
+        this.elements.teamModalClose = document.getElementById('team-modal-close');
+
         // Data management elements
         this.elements.currentDataSource = document.getElementById('current-data-source');
         this.elements.dataCharCount = document.getElementById('data-char-count');
@@ -89,14 +99,6 @@ class GameUI {
         this.elements.downloadCharExample = document.getElementById('download-char-example');
         this.elements.downloadPhraseExample = document.getElementById('download-phrase-example');
         this.elements.downloadCombinedExample = document.getElementById('download-combined-example');
-        
-        // Team selection modal elements
-        this.elements.teamSelectionModal = document.getElementById('team-selection-modal');
-        this.elements.teamSelectionClose = document.getElementById('team-selection-close');
-        this.elements.availableCharactersList = document.getElementById('available-characters-list');
-        this.elements.selectedTeamList = document.getElementById('selected-team-list');
-        this.elements.selectedCount = document.getElementById('selected-count');
-        this.elements.startBattleWithTeam = document.getElementById('start-battle-with-team');
     }
     
     // Bind event listeners
@@ -845,10 +847,11 @@ class GameUI {
         const count = this.teamSelectionState.selectedCharacters.length;
         const max = this.teamSelectionState.maxTeamSize;
         
-        this.elements.selectedCount.textContent = `${count}/${max}`;
+        this.elements.selectedCount.textContent = count;
+        this.elements.maxCount.textContent = max;
         
         // Update start battle button state
-        this.elements.startBattleWithTeam.disabled = count === 0;
+        this.elements.startBattleBtn.disabled = count === 0;
         
         // Update selected team list display
         this.elements.selectedTeamList.innerHTML = '';
@@ -874,12 +877,12 @@ class GameUI {
         });
         
         // Start battle button
-        this.elements.startBattleWithTeam.addEventListener('click', () => {
+        this.elements.startBattleBtn.addEventListener('click', () => {
             this.confirmTeamSelection();
         });
         
         // Close modal
-        this.elements.teamSelectionClose.addEventListener('click', () => {
+        this.elements.teamModalClose.addEventListener('click', () => {
             this.hideTeamSelectionModal();
         });
         
