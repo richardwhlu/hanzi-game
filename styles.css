@@ -634,6 +634,11 @@ body {
     font-weight: bold;
 }
 
+.battle-message.loot {
+    color: var(--gbc-yellow);
+    font-weight: bold;
+}
+
 .battle-controls {
     display: flex;
     justify-content: center;
@@ -649,4 +654,188 @@ body {
 
 .battle-character.hit-animation {
     animation: battle-hit 0.5s ease-in-out;
+}
+
+/* ITEMS UI STYLES */
+.items-info {
+    text-align: center;
+    margin-bottom: calc(var(--pixel-unit) * 4);
+    color: var(--gbc-black);
+}
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: calc(var(--pixel-unit) * 3);
+    margin-bottom: calc(var(--pixel-unit) * 4);
+}
+
+.item-card {
+    background: var(--gbc-light-grey);
+    border: 2px solid var(--gbc-dark-green);
+    border-radius: 4px;
+    padding: calc(var(--pixel-unit) * 3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.item-card:hover {
+    background: var(--gbc-cream);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.item-card.empty {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+.item-card.empty:hover {
+    transform: none;
+    box-shadow: none;
+    background: var(--gbc-light-grey);
+}
+
+.item-icon {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: calc(var(--pixel-unit) * 2);
+}
+
+.item-name {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: calc(var(--pixel-unit) * 1);
+    color: var(--gbc-dark-green);
+}
+
+.item-description {
+    font-size: 0.9em;
+    text-align: center;
+    margin-bottom: calc(var(--pixel-unit) * 2);
+    color: var(--gbc-black);
+}
+
+.item-quantity {
+    position: absolute;
+    top: calc(var(--pixel-unit) * 1);
+    right: calc(var(--pixel-unit) * 1);
+    background: var(--gbc-dark-green);
+    color: var(--gbc-cream);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.item-rarity {
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: calc(var(--pixel-unit) * 1);
+}
+
+.item-rarity.common { color: #666; }
+.item-rarity.uncommon { color: #0080ff; }
+.item-rarity.rare { color: #8000ff; }
+.item-rarity.epic { color: #ff8000; }
+
+.use-item-btn {
+    width: 100%;
+    margin-top: calc(var(--pixel-unit) * 2);
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--gbc-cream);
+    border: 3px solid var(--gbc-dark-green);
+    border-radius: 8px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-header {
+    background: var(--gbc-dark-green);
+    color: var(--gbc-cream);
+    padding: calc(var(--pixel-unit) * 3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.close-btn {
+    background: var(--gbc-red) !important;
+    color: var(--gbc-cream) !important;
+    border: none !important;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-body {
+    padding: calc(var(--pixel-unit) * 4);
+}
+
+.character-grid.small {
+    gap: calc(var(--pixel-unit) * 2);
+}
+
+.character-grid.small .character-card {
+    cursor: pointer;
+}
+
+.character-grid.small .character-card:hover {
+    background: var(--gbc-light-blue);
+    transform: translateY(-2px);
+}
+
+/* Empty items message */
+.empty-items-message {
+    text-align: center;
+    color: var(--gbc-black);
+    font-style: italic;
+    margin: calc(var(--pixel-unit) * 8) 0;
+}
+
+.empty-items-message h3 {
+    color: var(--gbc-dark-green);
+    margin-bottom: calc(var(--pixel-unit) * 2);
+}
+
+.empty-items-message p {
+    margin-bottom: calc(var(--pixel-unit) * 1);
 }

@@ -16,6 +16,7 @@ class GameUI {
         this.elements.playerLevel = document.getElementById('player-level');
         this.elements.playerXP = document.getElementById('player-xp');
         this.elements.characterCount = document.getElementById('character-count');
+        this.elements.itemCount = document.getElementById('item-count');
         
         // Screen elements
         this.elements.characterSelect = document.getElementById('character-select');
@@ -50,11 +51,22 @@ class GameUI {
         this.elements.battleMessages = document.getElementById('battle-messages');
         this.elements.attackBtn = document.getElementById('attack-btn');
         this.elements.findOpponentBtn = document.getElementById('find-opponent-btn');
+
+        // Items elements
+        this.elements.itemsScreen = document.getElementById('items-screen');
+        this.elements.itemsGrid = document.getElementById('items-grid');
+
+        // Modal elements
+        this.elements.characterModal = document.getElementById('character-modal');
+        this.elements.modalItemInfo = document.getElementById('modal-item-info');
+        this.elements.modalCharacterGrid = document.getElementById('modal-character-grid');
+        this.elements.modalClose = document.getElementById('modal-close');
     }
     
     // Bind event listeners
     bindEvents() {
         // Header button events
+        document.getElementById('items-btn').addEventListener('click', () => this.showItemsScreen());
         document.getElementById('battle-btn').addEventListener('click', () => this.startBattle());
         document.getElementById('save-btn').addEventListener('click', () => this.saveGame());
         document.getElementById('export-btn').addEventListener('click', () => this.exportGame());
@@ -66,6 +78,10 @@ class GameUI {
         document.getElementById('back-btn').addEventListener('click', () => this.showScreen('character-select'));
         document.getElementById('back-to-select').addEventListener('click', () => this.showScreen('character-select'));
         document.getElementById('back-from-evolution').addEventListener('click', () => this.showScreen('character-select'));
+        document.getElementById('items-back-btn').addEventListener('click', () => this.showScreen('character-select'));
+        
+        // Modal events
+        this.elements.modalClose.addEventListener('click', () => this.hideCharacterModal());
         
         // Character management events
         document.getElementById('add-character-btn').addEventListener('click', () => this.showScreen('manage-screen'));
@@ -124,6 +140,9 @@ class GameUI {
             case 'evolution-screen':
                 this.refreshPhraseGrid();
                 break;
+            case 'items-screen':
+                this.refreshItemsGrid();
+                break;
         }
         
         this.updateHeaderStats();
@@ -135,6 +154,7 @@ class GameUI {
         this.elements.playerLevel.textContent = stats.playerLevel;
         this.elements.playerXP.textContent = `${this.game.player.xp}/${this.game.player.getXPForNextLevel()}`;
         this.elements.characterCount.textContent = stats.totalCharacters;
+        this.elements.itemCount.textContent = this.game.bag.getTotalItemCount();
     }
     
     // Refresh character selection grid
@@ -171,9 +191,9 @@ class GameUI {
         
         const progressWidth = (character.xp / character.getXPForNextLevel()) * 100;
         
-        // Add visual indicator for phrase characters
-        const phraseIndicator = character.isPhraseCharacter ? '✨ ' : '';
-        const characterType = character.isPhraseCharacter ? 'Phrase' : `Level ${character.level}`;
+        // Remove sparkle indicator, show level for all characters
+        const phraseIndicator = '';
+        const characterType = `Level ${character.level}`;
         
         card.innerHTML = `
             <div class="character-display">${phraseIndicator}${character.char}</div>
@@ -754,6 +774,7 @@ class GameUI {
             <div class="character-info">
                 <strong>${character.pinyin}</strong>
                 ${isEnemy ? '' : `<br>Accuracy: ${character.getAccuracy ? character.getAccuracy() : 0}%`}
+                ${character.isPhrase ? '<br><span class="phrase-indicator">📜 Phrase</span>' : ''}
             </div>
         `;
         
@@ -870,6 +891,13 @@ class GameUI {
             this.addBattleMessage(`You learned the phrase "${addResult.name}"! It's now available for practice!`, 'victory');
         }
         
+        // Display item drops if any
+        if (addResult.itemDrops && addResult.itemDrops.length > 0) {
+            addResult.itemDrops.forEach(drop => {
+                this.addBattleMessage(`Found item: ${drop.item.name}! 🎁`, 'loot');
+            });
+        }
+        
         // Update game stats
         this.updateHeaderStats();
         
@@ -933,6 +961,135 @@ class GameUI {
         while (this.elements.battleMessages.children.length > 20) {
             this.elements.battleMessages.removeChild(this.elements.battleMessages.firstChild);
         }
+    }
+    
+    // ITEMS SYSTEM METHODS
+    
+    // Show items screen
+    showItemsScreen() {
+        this.showScreen('items-screen');
+    }
+    
+    // Refresh items grid
+    refreshItemsGrid() {
+        const items = this.game.getBagItems();
+        this.elements.itemsGrid.innerHTML = '';
+        
+        if (items.length === 0) {
+            this.elements.itemsGrid.innerHTML = `
+                <div class="empty-items-message">
+                    <h3>No Items Yet</h3>
+                    <p>Items can be found by defeating enemies in battle!</p>
+                    <p>Try battling some wild characters to collect XP boost items.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        items.forEach(item => {
+            const card = this.createItemCard(item);
+            this.elements.itemsGrid.appendChild(card);
+        });
+    }
+    
+    // Create item card element
+    createItemCard(item) {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        
+        card.innerHTML = `
+            <div class="item-quantity">${item.quantity}</div>
+            <div class="item-icon">${item.icon}</div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-rarity ${item.rarity}">${item.rarity}</div>
+            <div class="item-description">${item.description}</div>
+            <button class="pixel-btn use-item-btn">Use Item</button>
+        `;
+        
+        // Add click handler for use button
+        const useBtn = card.querySelector('.use-item-btn');
+        useBtn.addEventListener('click', () => this.startItemUsage(item.id));
+        
+        return card;
+    }
+    
+    // Start item usage (show character selection modal)
+    startItemUsage(itemId) {
+        const characters = this.game.getAvailableCharacters();
+        
+        if (characters.length === 0) {
+            this.showMessage('You need at least one character to use items!', 'error');
+            return;
+        }
+        
+        // Store the item ID for when character is selected
+        this.selectedItemId = itemId;
+        
+        // Get item info for display
+        const items = this.game.getBagItems();
+        const item = items.find(i => i.id === itemId);
+        
+        if (!item) {
+            this.showMessage('Item not found!', 'error');
+            return;
+        }
+        
+        // Update modal content
+        this.elements.modalItemInfo.textContent = `Select a character to use ${item.name}:`;
+        
+        // Populate character grid
+        this.elements.modalCharacterGrid.innerHTML = '';
+        characters.forEach(character => {
+            const card = this.createCharacterCard(character, false);
+            card.classList.add('modal-character-card');
+            
+            // Add click handler for character selection
+            card.addEventListener('click', () => this.useItemOnCharacter(this.selectedItemId, character.char));
+            
+            this.elements.modalCharacterGrid.appendChild(card);
+        });
+        
+        // Show modal
+        this.showCharacterModal();
+    }
+    
+    // Use item on selected character
+    useItemOnCharacter(itemId, characterName) {
+        const result = this.game.useItem(itemId, characterName);
+        
+        if (result.success) {
+            this.showMessage(result.message, 'success');
+            this.refreshItemsGrid();
+            this.updateHeaderStats();
+        } else {
+            this.showMessage(result.message, 'error');
+        }
+        
+        // Hide modal
+        this.hideCharacterModal();
+    }
+    
+    // Show character selection modal
+    showCharacterModal() {
+        this.elements.characterModal.classList.remove('hidden');
+        
+        // Add click outside to close
+        const handleOutsideClick = (e) => {
+            if (e.target === this.elements.characterModal) {
+                this.hideCharacterModal();
+                document.removeEventListener('click', handleOutsideClick);
+            }
+        };
+        
+        setTimeout(() => {
+            document.addEventListener('click', handleOutsideClick);
+        }, 100);
+    }
+    
+    // Hide character selection modal
+    hideCharacterModal() {
+        this.elements.characterModal.classList.add('hidden');
+        this.selectedItemId = null;
     }
     
     // Initialize UI

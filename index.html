@@ -55,8 +55,13 @@
                     <span class="stat-label">Characters:</span>
                     <span id="character-count">0</span>
                 </div>
+                <div class="stat">
+                    <span class="stat-label">Items:</span>
+                    <span id="item-count">0</span>
+                </div>
             </div>
             <div class="game-controls">
+                <button id="items-btn" class="pixel-btn items-btn" title="View and use items">🎒 Items</button>
                 <button id="battle-btn" class="pixel-btn battle-btn" title="Battle wild characters and phrases!">⚔️ Battle</button>
                 <button id="save-btn" class="pixel-btn" title="Save to browser (auto-saves anyway)">Save</button>
                 <button id="export-btn" class="pixel-btn" title="Download backup file">Export</button>
@@ -139,6 +144,18 @@
                 <button id="back-from-evolution" class="pixel-btn">Back</button>
             </div>
 
+            <!-- Items/Bag screen -->
+            <div id="items-screen" class="screen">
+                <h2>Items Bag</h2>
+                <div class="items-info">
+                    <p>Use items to boost your characters' XP and help them level up faster!</p>
+                </div>
+                <div id="items-grid" class="items-grid">
+                    <!-- Items will be displayed here -->
+                </div>
+                <button id="items-back-btn" class="pixel-btn">← Back</button>
+            </div>
+
             <!-- Battle screen -->
             <div id="battle-screen" class="screen">
                 <h2>Battle Arena</h2>
@@ -186,6 +203,22 @@
                 </div>
             </div>
         </main>
+
+        <!-- Character Selection Modal for Item Usage -->
+        <div id="character-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Choose Character</h3>
+                    <button id="modal-close" class="pixel-btn close-btn">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-item-info">Select a character to use this item on:</p>
+                    <div id="modal-character-grid" class="character-grid small">
+                        <!-- Characters for selection will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="game-data.js"></script>
