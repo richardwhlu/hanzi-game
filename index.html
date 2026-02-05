@@ -4,35 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hanzi Creatures - Learn Chinese Characters</title>
-    <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="alternate icon" href="favicon.svg">
-    <link rel="shortcut icon" href="favicon.svg">
+
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="practice-styles.css">
     <script src="https://unpkg.com/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
     <script>
-        // Check if HanziWriter loaded, if not try local fallback
+        // Check if HanziWriter loaded from CDN
         window.addEventListener('DOMContentLoaded', function() {
             if (typeof HanziWriter === 'undefined') {
-                console.log('CDN HanziWriter failed, trying local fallback...');
-                const script = document.createElement('script');
-                script.src = './hanzi-writer.min.js';
-                script.onload = function() {
-                    console.log('Local HanziWriter loaded successfully');
-                    if (window.game && window.gameUI) {
-                        window.gameUI.showMessage('Library loaded! You can now practice characters.', 'success');
-                    }
-                };
-                script.onerror = function() {
-                    console.error('Both CDN and local HanziWriter failed');
-                    if (window.gameUI) {
-                        window.gameUI.showMessage('Failed to load character writing library. Please refresh the page or check your connection.', 'error');
-                    } else {
-                        // Show basic error if UI isn't loaded yet
-                        document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;"><h2>⚠️ Loading Error</h2><p>Failed to load the character writing library.<br>Please refresh the page or check your internet connection.</p><button onclick="location.reload()">Refresh Page</button></div>';
-                    }
-                };
-                document.head.appendChild(script);
+                console.error('HanziWriter failed to load from CDN');
+                document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;color:#333;"><h2>⚠️ Loading Error</h2><p>Failed to load the character writing library from CDN.<br>Please check your internet connection and refresh the page.</p><button onclick="location.reload()" style="padding:10px 20px;font-size:16px;cursor:pointer;">🔄 Refresh Page</button></div>';
             } else {
                 console.log('HanziWriter loaded from CDN successfully');
             }
@@ -79,6 +60,7 @@
                 <div class="dropdown">
                     <button id="settings-menu-btn" class="pixel-btn dropdown-btn" title="Game settings">⚙️ Settings</button>
                     <div class="dropdown-content">
+                        <button id="instructions-btn" class="dropdown-item" title="How to play the game">📖 Instructions</button>
                         <button id="manage-btn" class="dropdown-item" title="Manage characters and data">🀄 Manage Data</button>
                         <button id="game-reset-btn" class="dropdown-item reset-btn" title="Reset all game data (cannot be undone!)">🗑️ Reset Game</button>
                     </div>
@@ -250,6 +232,137 @@
                     <button id="battle-back-btn" class="pixel-btn">← Back to Practice</button>
                     <button id="find-opponent-btn" class="pixel-btn">Find New Opponent</button>
                 </div>
+            </div>
+
+            <!-- Instructions screen -->
+            <div id="instructions-screen" class="screen">
+                <h2>📖 How to Play Hanzi Creatures</h2>
+                
+                <div class="instructions-content">
+                    <div class="instruction-section">
+                        <h3>🎯 Game Overview</h3>
+                        <p><strong>Hanzi Creatures</strong> is a Chinese character learning game that combines writing practice with RPG-style progression. Train your characters by practicing writing, unlock new phrases, collect items, and battle wild characters!</p>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>✏️ Character Practice</h3>
+                        <ul>
+                            <li><strong>Select a character</strong> from the main screen to start practicing</li>
+                            <li><strong>Draw strokes</strong> in the correct order on the practice area</li>
+                            <li><strong>Use hints</strong> to see just the next stroke you need to draw</li>
+                            <li><strong>Earn XP</strong> based on accuracy and speed</li>
+                            <li><strong>Level up</strong> characters to increase their combat stats</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>🌱 Character Growth</h3>
+                        <div class="stat-explanation">
+                            <div class="stat-item">
+                                <strong>Level:</strong> Increases with XP, improves all stats
+                            </div>
+                            <div class="stat-item">
+                                <strong>HP (Health Points):</strong> Character's battle endurance
+                            </div>
+                            <div class="stat-item">
+                                <strong>ATK (Attack):</strong> Damage dealt in battles
+                            </div>
+                            <div class="stat-item">
+                                <strong>DEF (Defense):</strong> Damage reduction in battles
+                            </div>
+                            <div class="stat-item">
+                                <strong>Accuracy:</strong> Your writing skill (affects XP gained)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>📜 Phrases & Evolution</h3>
+                        <ul>
+                            <li><strong>Level up characters</strong> to unlock phrase combinations</li>
+                            <li><strong>Visit "Create Phrases"</strong> to practice multi-character sequences</li>
+                            <li><strong>Complete phrases</strong> to turn them into powerful phrase characters</li>
+                            <li><strong>Phrase characters</strong> have enhanced stats and can be used in battle</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>⚔️ Battle System</h3>
+                        <ul>
+                            <li><strong>Unlock battles</strong> by completing 10 practice sessions</li>
+                            <li><strong>Choose up to 6 characters</strong> for your battle team</li>
+                            <li><strong>Attack enemies</strong> and switch between team members</li>
+                            <li><strong>Defeat opponents</strong> to capture new characters and find items</li>
+                            <li><strong>Battle completion</strong> locks battles until you practice 10 more times</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>🎒 Items & Inventory</h3>
+                        <ul>
+                            <li><strong>Find items</strong> by defeating enemies in battles</li>
+                            <li><strong>Use XP boost items</strong> to help characters level up faster</li>
+                            <li><strong>Select a character</strong> when using items to apply the effect</li>
+                            <li><strong>Items stack</strong> - collect multiples of the same type</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>🀄 Character Management</h3>
+                        <ul>
+                            <li><strong>Add new characters</strong> by typing them in the Manage Data screen</li>
+                            <li><strong>Provide pinyin</strong> pronunciation for custom characters</li>
+                            <li><strong>Upload custom data</strong> with JSON files for advanced users</li>
+                            <li><strong>Remove characters</strong> you no longer want to practice</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>💾 Save & Progress</h3>
+                        <ul>
+                            <li><strong>Auto-save:</strong> Game saves automatically to your browser</li>
+                            <li><strong>Export:</strong> Download a backup file to keep your progress</li>
+                            <li><strong>Load:</strong> Upload a backup file to restore your game</li>
+                            <li><strong>Reset:</strong> Start over completely (cannot be undone!)</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>💡 Tips for Success</h3>
+                        <div class="tips-grid">
+                            <div class="tip-item">
+                                <strong>🎯 Focus on Accuracy:</strong> Higher accuracy gives more XP
+                            </div>
+                            <div class="tip-item">
+                                <strong>📚 Practice Regularly:</strong> Consistent practice unlocks battles
+                            </div>
+                            <div class="tip-item">
+                                <strong>⚔️ Battle Strategically:</strong> Level up characters before tough battles
+                            </div>
+                            <div class="tip-item">
+                                <strong>🔮 Create Phrases:</strong> Phrase characters are very powerful
+                            </div>
+                            <div class="tip-item">
+                                <strong>🎒 Use Items Wisely:</strong> Save XP boosts for difficult characters
+                            </div>
+                            <div class="tip-item">
+                                <strong>💾 Export Often:</strong> Keep backups of your progress
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>❓ Troubleshooting</h3>
+                        <ul>
+                            <li><strong>Characters not loading?</strong> Check your internet connection for the font library</li>
+                            <li><strong>Strokes not working?</strong> Make sure to follow the correct stroke order</li>
+                            <li><strong>Progress lost?</strong> Import your last exported backup file</li>
+                            <li><strong>Battle locked?</strong> Complete more practice sessions to unlock</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button id="instructions-back-btn" class="pixel-btn">← Back to Game</button>
             </div>
         </main>
 

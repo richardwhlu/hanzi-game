@@ -370,7 +370,32 @@ class HanziGame {
     // Show hint for current character
     showHint() {
         if (!this.currentWriter) return;
-        this.currentWriter.showOutline();
+        
+        try {
+            // Show just the next stroke as a hint (much more helpful for learning!)
+            this.currentWriter.showNextStroke();
+            console.log('Hint shown: next stroke');
+        } catch (error) {
+            console.error('Error showing next stroke hint:', error);
+            // Fallback: try showing character outline
+            try {
+                this.currentWriter.showCharacter({
+                    strokeColor: '#ddd',
+                    strokeWidth: 2,
+                    onComplete: () => {
+                        console.log('Fallback hint: showed character outline');
+                    }
+                });
+            } catch (fallbackError) {
+                console.error('All hint methods failed:', fallbackError);
+                // Final fallback: animate the character
+                try {
+                    this.currentWriter.animateCharacter();
+                } catch (finalError) {
+                    console.error('Final hint fallback failed:', finalError);
+                }
+            }
+        }
     }
     
     // Reset current practice

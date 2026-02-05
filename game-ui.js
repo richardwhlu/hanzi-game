@@ -115,6 +115,7 @@ class GameUI {
         document.getElementById('back-to-select').addEventListener('click', () => this.showScreen('character-select'));
         document.getElementById('back-from-evolution').addEventListener('click', () => this.showScreen('character-select'));
         document.getElementById('items-back-btn').addEventListener('click', () => this.showScreen('character-select'));
+        document.getElementById('instructions-back-btn').addEventListener('click', () => this.showScreen('character-select'));
         
         // Modal events
         this.elements.modalClose.addEventListener('click', () => this.hideCharacterModal());
@@ -1737,6 +1738,11 @@ class GameUI {
         document.getElementById('load-btn').addEventListener('click', () => {
             this.loadGame();
             closeDropdown(fileDropdown);
+        });
+        
+        document.getElementById('instructions-btn').addEventListener('click', () => {
+            this.showScreen('instructions-screen');
+            closeDropdown(settingsDropdown);
         });
         
         document.getElementById('manage-btn').addEventListener('click', () => {

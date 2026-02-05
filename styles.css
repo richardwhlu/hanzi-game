@@ -1354,3 +1354,141 @@ body {
         gap: calc(var(--pixel-unit));
     }
 }
+
+/* Instructions Screen Styles */
+#instructions-screen {
+    padding: calc(var(--pixel-unit) * 3);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.instructions-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.instruction-section {
+    margin-bottom: calc(var(--pixel-unit) * 4);
+    padding: calc(var(--pixel-unit) * 2);
+    background: rgba(255, 255, 255, 0.1);
+    border: calc(var(--pixel-unit) / 2) solid var(--gbc-dark-green);
+    border-radius: calc(var(--pixel-unit) / 2);
+}
+
+.instruction-section h3 {
+    margin: 0 0 calc(var(--pixel-unit) * 2) 0;
+    color: var(--gbc-yellow);
+    font-size: 1.4em;
+    border-bottom: calc(var(--pixel-unit) / 2) solid var(--gbc-yellow);
+    padding-bottom: calc(var(--pixel-unit));
+}
+
+.instruction-section p {
+    margin: 0 0 calc(var(--pixel-unit) * 2) 0;
+    line-height: 1.5;
+    font-size: 1.1em;
+}
+
+.instruction-section ul {
+    margin: 0;
+    padding-left: calc(var(--pixel-unit) * 3);
+}
+
+.instruction-section li {
+    margin-bottom: calc(var(--pixel-unit));
+    line-height: 1.4;
+}
+
+.instruction-section li strong {
+    color: var(--gbc-yellow);
+}
+
+/* Stat explanation grid */
+.stat-explanation {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: calc(var(--pixel-unit) * 2);
+    margin-top: calc(var(--pixel-unit) * 2);
+}
+
+.stat-item {
+    padding: calc(var(--pixel-unit) * 2);
+    background: rgba(0, 0, 0, 0.3);
+    border: calc(var(--pixel-unit) / 2) solid var(--gbc-green);
+    border-radius: calc(var(--pixel-unit) / 2);
+    line-height: 1.3;
+}
+
+.stat-item strong {
+    color: var(--gbc-blue);
+    display: block;
+    margin-bottom: calc(var(--pixel-unit) / 2);
+}
+
+/* Tips grid */
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: calc(var(--pixel-unit) * 2);
+    margin-top: calc(var(--pixel-unit) * 2);
+}
+
+.tip-item {
+    padding: calc(var(--pixel-unit) * 2);
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+    border: calc(var(--pixel-unit) / 2) solid var(--gbc-green);
+    border-radius: calc(var(--pixel-unit));
+    line-height: 1.3;
+    position: relative;
+}
+
+.tip-item::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--pixel-unit) / 2);
+    left: calc(var(--pixel-unit) / 2);
+    width: calc(var(--pixel-unit));
+    height: calc(var(--pixel-unit));
+    background: var(--gbc-yellow);
+    border-radius: 50%;
+}
+
+.tip-item strong {
+    color: var(--gbc-yellow);
+    display: block;
+    margin-bottom: calc(var(--pixel-unit) / 2);
+}
+
+/* Instructions back button */
+#instructions-back-btn {
+    margin-top: calc(var(--pixel-unit) * 4);
+    font-size: 1.1em;
+}
+
+/* Instructions responsive */
+@media (max-width: 768px) {
+    #instructions-screen {
+        padding: calc(var(--pixel-unit) * 2);
+    }
+    
+    .instruction-section {
+        padding: calc(var(--pixel-unit) * 1.5);
+    }
+    
+    .stat-explanation {
+        grid-template-columns: 1fr;
+    }
+    
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .instruction-section h3 {
+        font-size: 1.2em;
+    }
+    
+    .instruction-section p,
+    .instruction-section li {
+        font-size: 1em;
+    }
+}
