@@ -1207,4 +1207,34 @@ class HanziGame {
             combined: this.dataManager.generateExampleCombinedJSON()
         };
     }
+    
+    // Reset game to default state (for game reset functionality)
+    resetToDefaults() {
+        // Reset player
+        this.player = new Player();
+        
+        // Reset bag
+        this.bag = new Bag();
+        
+        // Clear all characters and phrases
+        this.characters = {};
+        this.phrases = {};
+        
+        // Reset current character and practice state
+        this.currentCharacter = null;
+        this.practiceStartTime = null;
+        this.strokes = [];
+        this.mistakes = [];
+        
+        // Reset phrase practice state
+        this.currentPhraseSequence = null;
+        
+        // Reinitialize with default starter characters
+        this.initializeStarterCharacters();
+        
+        // Reinitialize phrases
+        this.initializePhrases();
+        
+        console.log('Game reset to default state');
+    }
 }

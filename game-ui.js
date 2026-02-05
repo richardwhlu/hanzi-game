@@ -106,9 +106,7 @@ class GameUI {
         // Header button events
         document.getElementById('items-btn').addEventListener('click', () => this.showItemsScreen());
         document.getElementById('battle-btn').addEventListener('click', () => this.startBattle());
-        document.getElementById('save-btn').addEventListener('click', () => this.saveGame());
-        document.getElementById('export-btn').addEventListener('click', () => this.exportGame());
-        document.getElementById('load-btn').addEventListener('click', () => this.loadGame());
+        // Note: File menu buttons (save, export, load) are handled in setupDropdownMenus()
         document.getElementById('manage-btn').addEventListener('click', () => this.showScreen('manage-screen'));
         document.getElementById('game-reset-btn').addEventListener('click', () => this.resetGame());
         
@@ -708,7 +706,9 @@ class GameUI {
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `hanzi-game-save-${new Date().toISOString().split('T')[0]}.json`;
+        // Create timestamp with format: YYYY-MM-DD_HH-MM-SS
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        a.download = `hanzi-game-save-${timestamp}.json`;
         a.click();
         
         URL.revokeObjectURL(url);
@@ -726,13 +726,20 @@ class GameUI {
                     // Clear localStorage
                     localStorage.removeItem('hanzi-game-save');
                     
-                    // Show confirmation message
-                    this.showMessage('Game reset complete! The page will reload...', 'success');
+                    // Also clear any practice tracker data
+                    localStorage.removeItem('practice-tracker-data');
                     
-                    // Reload the page to start fresh
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
+                    // Reset the game instance in memory
+                    this.game.resetToDefaults();
+                    
+                    // Reset the UI
+                    this.refreshCharacterGrid();
+                    this.updateHeaderStats();
+                    this.showScreen('character-select');
+                    
+                    // Show confirmation message
+                    this.showMessage('Game reset complete! All progress has been cleared.', 'success');
+                    
                 } catch (error) {
                     console.error('Error resetting game:', error);
                     this.showMessage('Error resetting game data. Please refresh the page manually.', 'error');
@@ -1529,7 +1536,9 @@ class GameUI {
             
             const a = document.createElement('a');
             a.href = url;
-            a.download = `hanzi-game-custom-data-${new Date().toISOString().split('T')[0]}.json`;
+            // Create timestamp with format: YYYY-MM-DD_HH-MM-SS
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            a.download = `hanzi-game-custom-data-${timestamp}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
