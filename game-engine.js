@@ -20,6 +20,9 @@ class HanziGame {
         this.currentPhrase = null;
         this.currentPhraseIndex = 0;
         
+        // Data management
+        this.dataManager = new DataManager();
+        
         this.init();
     }
     
@@ -67,11 +70,12 @@ class HanziGame {
         this.player = new Player();
         this.bag = new Bag();
         
-        // Add some starter characters
+        // Add some starter characters from active character data
+        const activeCharacterData = this.dataManager.getActiveCharacterData();
         const starters = ['你', '好', '我'];
         for (const char of starters) {
-            if (DEFAULT_CHARACTERS[char]) {
-                this.characters[char] = new Character(char, DEFAULT_CHARACTERS[char]);
+            if (activeCharacterData[char]) {
+                this.characters[char] = new Character(char, activeCharacterData[char]);
             }
         }
         
@@ -83,9 +87,10 @@ class HanziGame {
         console.log('New game created');
     }
     
-    // Initialize phrases from defaults
+    // Initialize phrases from active data
     initializePhrases() {
-        for (const [text, phraseData] of Object.entries(DEFAULT_PHRASES)) {
+        const activePhraseData = this.dataManager.getActivePhraseData();
+        for (const [text, phraseData] of Object.entries(activePhraseData)) {
             if (!this.phrases[text]) {
                 this.phrases[text] = new Phrase(text, phraseData);
             }
@@ -113,9 +118,10 @@ class HanziGame {
             return { success: false, message: 'Character already exists' };
         }
         
-        // Use default data if available, otherwise create basic entry
-        const characterData = DEFAULT_CHARACTERS[char] ? 
-            { ...DEFAULT_CHARACTERS[char], ...data } :  // Merge with defaults if available
+        // Use active character data if available, otherwise create basic entry
+        const activeCharacterData = this.dataManager.getActiveCharacterData();
+        const characterData = activeCharacterData[char] ? 
+            { ...activeCharacterData[char], ...data } :  // Merge with active data if available
             {
                 pinyin: data.pinyin || '',
                 strokes: data.strokes || 5, // reasonable default
@@ -294,6 +300,7 @@ class HanziGame {
         // Add XP to player
         const playerLeveledUp = this.player.addXP(Math.floor(result.xpGained / 2));
         this.player.totalPracticeTime += completionTime;
+        this.player.practiceCount += 1; // Increment practice count for battle unlock
         
         // Check for new unlocks
         const newUnlocks = this.checkForNewUnlocks();
@@ -628,19 +635,23 @@ class HanziGame {
     
     // Generate a wild character/phrase for battle
     generateWildOpponent() {
-        // Get all possible characters and phrases from defaults that player doesn't have
+        // Get all possible characters and phrases from active data that player doesn't have
         const wildCharacters = [];
         const wildPhrases = [];
         
-        // Find characters from DEFAULT_CHARACTERS that player doesn't have
-        for (const [char, data] of Object.entries(DEFAULT_CHARACTERS)) {
+        // Get active data from DataManager
+        const activeCharacterData = this.dataManager.getActiveCharacterData();
+        const activePhraseData = this.dataManager.getActivePhraseData();
+        
+        // Find characters from active character data that player doesn't have
+        for (const [char, data] of Object.entries(activeCharacterData)) {
             if (!this.characters[char]) {
                 wildCharacters.push({ char, ...data, isWild: true });
             }
         }
         
-        // Find phrases from DEFAULT_PHRASES that player doesn't have unlocked
-        for (const [text, data] of Object.entries(DEFAULT_PHRASES)) {
+        // Find phrases from active phrase data that player doesn't have unlocked
+        for (const [text, data] of Object.entries(activePhraseData)) {
             if (!this.phrases[text] || !this.phrases[text].unlocked) {
                 wildPhrases.push({ text, ...data, isWild: true, isPhrase: true });
             }
@@ -670,10 +681,12 @@ class HanziGame {
             // Create weighted array based on stroke count (lower strokes = higher weight)
             const weightedOpponents = [];
             
+            const activeCharacterData = this.dataManager.getActiveCharacterData();
+            
             opponents.forEach(opponent => {
                 const strokes = opponent.strokes || (opponent.characters ? 
                     opponent.characters.reduce((total, char) => {
-                        const charData = DEFAULT_CHARACTERS[char];
+                        const charData = activeCharacterData[char];
                         return total + (charData ? charData.strokes : 5);
                     }, 0) : 10);
                 
@@ -696,11 +709,12 @@ class HanziGame {
         } else {
             // Mid-late game: more balanced selection but still slight preference for simpler
             const weightedOpponents = [];
+            const activeCharacterData = this.dataManager.getActiveCharacterData();
             
             opponents.forEach(opponent => {
                 const strokes = opponent.strokes || (opponent.characters ? 
                     opponent.characters.reduce((total, char) => {
-                        const charData = DEFAULT_CHARACTERS[char];
+                        const charData = activeCharacterData[char];
                         return total + (charData ? charData.strokes : 5);
                     }, 0) : 10);
                 
@@ -722,6 +736,7 @@ class HanziGame {
     // Create a battle-ready opponent from character/phrase data
     createBattleOpponent(opponentData) {
         let battleOpponent;
+        const activeCharacterData = this.dataManager.getActiveCharacterData();
         
         if (opponentData.isPhrase) {
             // Create phrase opponent
@@ -734,7 +749,7 @@ class HanziGame {
                 // Calculate combined stats from component characters
                 strokes: opponentData.characters ? 
                     opponentData.characters.reduce((total, char) => {
-                        const charData = DEFAULT_CHARACTERS[char];
+                        const charData = activeCharacterData[char];
                         return total + (charData ? charData.strokes : 5);
                     }, 0) : 10, // fallback
                 difficulty: opponentData.difficulty,
@@ -861,6 +876,23 @@ class HanziGame {
     // Get player's average character level (kept for compatibility)
     getPlayerAverageLevel() {
         return this.getPlayerLevelStats().averageLevel;
+    }
+    
+    // Check if battles are unlocked (requires 10+ practice sessions)
+    isBattleUnlocked() {
+        const REQUIRED_PRACTICES = 10;
+        return this.player.practiceCount >= REQUIRED_PRACTICES;
+    }
+    
+    // Get practice progress toward battle unlock
+    getBattleUnlockProgress() {
+        const REQUIRED_PRACTICES = 10;
+        return {
+            current: this.player.practiceCount,
+            required: REQUIRED_PRACTICES,
+            isUnlocked: this.isBattleUnlocked(),
+            remaining: Math.max(0, REQUIRED_PRACTICES - this.player.practiceCount)
+        };
     }
     
     // Execute battle turn (player attacks enemy)
@@ -1050,5 +1082,129 @@ class HanziGame {
             this.saveGame();
         }
         return result;
+    }
+
+    // DATA MANAGEMENT METHODS
+    
+    // Import character data from JSON
+    importCharacterData(jsonData) {
+        try {
+            const result = this.dataManager.importCharacterData(jsonData);
+            
+            // After successful import, we need to reinitialize the game with new data
+            if (result.success) {
+                this.reinitializeWithCustomData();
+                this.saveGame();
+            }
+            
+            return result;
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    }
+
+    // Import phrase data from JSON
+    importPhraseData(jsonData) {
+        try {
+            const result = this.dataManager.importPhraseData(jsonData);
+            
+            // After successful import, we need to reinitialize the game with new data
+            if (result.success) {
+                this.reinitializeWithCustomData();
+                this.saveGame();
+            }
+            
+            return result;
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    }
+
+    // Import combined character and phrase data from JSON
+    importCombinedData(jsonData) {
+        try {
+            const result = this.dataManager.importCombinedData(jsonData);
+            
+            // After successful import, we need to reinitialize the game with new data
+            if (result.success) {
+                this.reinitializeWithCustomData();
+                this.saveGame();
+            }
+            
+            return result;
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    }
+
+    // Switch between built-in and custom data
+    switchDataSource(source) {
+        try {
+            this.dataManager.setDataSource(source);
+            this.reinitializeWithCustomData();
+            this.saveGame();
+            
+            return { 
+                success: true, 
+                message: `Switched to ${source} data successfully`,
+                dataSource: source
+            };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    }
+
+    // Reinitialize phrases when data source changes
+    reinitializeWithCustomData() {
+        // Clear current phrases and reinitialize with new data
+        this.phrases = {};
+        this.initializePhrases();
+        
+        // Check which phrases are still valid based on current characters
+        this.checkForNewUnlocks();
+        
+        // Update player totals
+        this.player.totalPhrases = Object.values(this.phrases).filter(p => p.unlocked).length;
+    }
+
+    // Get data management status
+    getDataManagerStatus() {
+        return this.dataManager.getDataStats();
+    }
+
+    // Check if custom data is available
+    hasCustomData() {
+        return this.dataManager.hasCustomData();
+    }
+
+    // Get current data source
+    getCurrentDataSource() {
+        return this.dataManager.getDataSource();
+    }
+
+    // Clear custom data
+    clearCustomData() {
+        this.dataManager.clearCustomData();
+        
+        // If we were using custom data, switch back to built-in
+        if (this.getCurrentDataSource() === 'custom') {
+            this.switchDataSource('built-in');
+        }
+        
+        return { success: true, message: 'Custom data cleared successfully' };
+    }
+
+    // Export custom data as JSON
+    exportCustomData() {
+        return this.dataManager.exportCustomData();
+    }
+
+    // Get example JSON structures for help
+    getExampleJSONStructures() {
+        return {
+            characters: this.dataManager.generateExampleCharacterJSON(),
+            phrases: this.dataManager.generateExamplePhraseJSON(),
+            combined: this.dataManager.generateExampleCombinedJSON()
+        };
     }
 }

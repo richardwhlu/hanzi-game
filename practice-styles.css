@@ -1,0 +1,491 @@
+/**
+ * CSS Styles for Practice Session Tracking System
+ * 
+ * Styles for progress indicators, battle button states, congratulatory messages,
+ * and celebration effects.
+ */
+
+/* Practice Progress Indicator */
+.practice-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+    padding: 12px;
+    background: var(--gbc-lightest);
+    border: 2px solid var(--gbc-dark-green);
+    border-radius: 8px;
+    min-width: 200px;
+    position: relative;
+}
+
+.practice-progress .progress-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--gbc-dark-green);
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 12px;
+    background: var(--gbc-light-gray);
+    border: 1px solid var(--gbc-dark-green);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gbc-blue) 0%, var(--gbc-green) 100%);
+    transition: width 0.5s ease-in-out;
+    border-radius: 4px;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: progress-shine 2s infinite;
+}
+
+@keyframes progress-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--gbc-dark-green);
+    min-width: 30px;
+    text-align: center;
+}
+
+.progress-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gbc-dark-green);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    margin-top: 5px;
+    z-index: 1000;
+}
+
+.practice-progress:hover .progress-tooltip {
+    opacity: 1;
+}
+
+.practice-progress.completed .progress-bar {
+    background: var(--gbc-green);
+    box-shadow: 0 0 10px rgba(139, 195, 74, 0.5);
+}
+
+.practice-progress.completed .progress-fill {
+    background: linear-gradient(90deg, var(--gbc-yellow) 0%, var(--gbc-green) 100%);
+}
+
+.practice-progress.completed .progress-tooltip {
+    background: var(--gbc-green);
+}
+
+/* Battle Button States */
+.battle-btn.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    position: relative;
+    filter: grayscale(0.7);
+}
+
+.battle-btn.locked::before {
+    content: '🔒';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--gbc-red);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    z-index: 2;
+    border: 2px solid var(--gbc-dark-green);
+}
+
+.battle-btn.locked:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.battle-btn.unlocked {
+    position: relative;
+}
+
+.battle-btn.unlocked::before {
+    content: '🔓';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--gbc-green);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    z-index: 2;
+    border: 2px solid var(--gbc-dark-green);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.battle-btn.unlocked:hover::before {
+    opacity: 1;
+}
+
+/* Shake animation for locked button */
+.shake-animation {
+    animation: shake 0.6s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Congratulatory Modal */
+.practice-unlock-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.practice-unlock-modal.show {
+    opacity: 1;
+}
+
+.celebration-content {
+    background: linear-gradient(135deg, var(--gbc-lightest) 0%, white 100%);
+    border: 3px solid var(--gbc-yellow);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    animation: celebration-appear 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes celebration-appear {
+    0% {
+        transform: scale(0.8) translateY(50px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.celebration-header {
+    background: linear-gradient(90deg, var(--gbc-yellow) 0%, var(--gbc-green) 100%);
+    color: var(--gbc-dark-green);
+    padding: 20px;
+    text-align: center;
+    border-bottom: 3px solid var(--gbc-dark-green);
+}
+
+.celebration-icon {
+    font-size: 48px;
+    animation: celebration-bounce 1s ease-in-out infinite alternate;
+    display: block;
+    margin-bottom: 10px;
+}
+
+@keyframes celebration-bounce {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
+
+.celebration-header h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.celebration-body {
+    padding: 25px;
+    text-align: center;
+}
+
+.celebration-message {
+    margin-bottom: 20px;
+}
+
+.celebration-message p {
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 1.4;
+    color: var(--gbc-dark-green);
+}
+
+.celebration-message p:first-child {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.celebration-stats {
+    background: var(--gbc-lightest);
+    border: 2px solid var(--gbc-light-green);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.celebration-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+
+.celebration-stat .stat-label {
+    font-size: 12px;
+    color: var(--gbc-dark-green);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.celebration-stat .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--gbc-blue);
+}
+
+.celebration-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.celebration-btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.celebration-btn.primary {
+    background: var(--gbc-green);
+    color: white;
+    border: 2px solid var(--gbc-dark-green);
+}
+
+.celebration-btn.primary:hover {
+    background: var(--gbc-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.celebration-btn:not(.primary) {
+    background: var(--gbc-light-gray);
+    color: var(--gbc-dark-green);
+    border: 2px solid var(--gbc-dark-green);
+}
+
+.celebration-btn:not(.primary):hover {
+    background: var(--gbc-lightest);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Confetti Animation */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    animation: confetti-fall 3s linear infinite;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .practice-progress {
+        min-width: 150px;
+        margin: 5px;
+        padding: 8px;
+    }
+    
+    .practice-progress .progress-label {
+        font-size: 11px;
+    }
+    
+    .progress-text {
+        font-size: 10px;
+    }
+    
+    .progress-tooltip {
+        font-size: 9px;
+    }
+    
+    .celebration-content {
+        margin: 20px;
+        width: auto;
+    }
+    
+    .celebration-header h3 {
+        font-size: 20px;
+    }
+    
+    .celebration-icon {
+        font-size: 36px;
+    }
+    
+    .celebration-message p {
+        font-size: 14px;
+    }
+    
+    .celebration-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .celebration-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .celebration-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .practice-progress {
+        border-width: 3px;
+    }
+    
+    .progress-fill {
+        background: #000;
+    }
+    
+    .battle-btn.locked {
+        opacity: 0.3;
+        filter: none;
+    }
+    
+    .celebration-content {
+        border-width: 4px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .progress-fill,
+    .progress-fill::after,
+    .celebration-content,
+    .celebration-icon,
+    .confetti-piece,
+    .shake-animation {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .progress-fill::after {
+        display: none;
+    }
+}
+
+/* Focus styles for accessibility */
+.celebration-btn:focus {
+    outline: 3px solid var(--gbc-blue);
+    outline-offset: 2px;
+}
+
+.battle-btn:focus {
+    outline: 3px solid var(--gbc-yellow);
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .practice-progress,
+    .practice-unlock-modal,
+    .confetti-container {
+        display: none !important;
+    }
+}

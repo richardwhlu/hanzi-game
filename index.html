@@ -8,6 +8,7 @@
     <link rel="alternate icon" href="favicon.svg">
     <link rel="shortcut icon" href="favicon.svg">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="practice-styles.css">
     <script src="https://unpkg.com/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
     <script>
         // Check if HanziWriter loaded, if not try local fallback
@@ -63,11 +64,25 @@
             <div class="game-controls">
                 <button id="items-btn" class="pixel-btn items-btn" title="View and use items">🎒 Items</button>
                 <button id="battle-btn" class="pixel-btn battle-btn" title="Battle wild characters and phrases!">⚔️ Battle</button>
-                <button id="save-btn" class="pixel-btn" title="Save to browser (auto-saves anyway)">Save</button>
-                <button id="export-btn" class="pixel-btn" title="Download backup file">Export</button>
-                <button id="load-btn" class="pixel-btn" title="Load from backup file">Load</button>
-                <button id="game-reset-btn" class="pixel-btn reset-btn" title="Reset all game data (cannot be undone!)">🗑️ Reset</button>
-                <button id="manage-btn" class="pixel-btn">Manage</button>
+                
+                <!-- File Operations Dropdown -->
+                <div class="dropdown">
+                    <button id="file-menu-btn" class="pixel-btn dropdown-btn" title="File operations">💾 File</button>
+                    <div class="dropdown-content">
+                        <button id="save-btn" class="dropdown-item" title="Save to browser (auto-saves anyway)">💾 Save</button>
+                        <button id="export-btn" class="dropdown-item" title="Download backup file">📤 Export</button>
+                        <button id="load-btn" class="dropdown-item" title="Load from backup file">📥 Load</button>
+                    </div>
+                </div>
+                
+                <!-- Settings Dropdown -->
+                <div class="dropdown">
+                    <button id="settings-menu-btn" class="pixel-btn dropdown-btn" title="Game settings">⚙️ Settings</button>
+                    <div class="dropdown-content">
+                        <button id="manage-btn" class="dropdown-item" title="Manage characters and data">🀄 Manage Data</button>
+                        <button id="game-reset-btn" class="dropdown-item reset-btn" title="Reset all game data (cannot be undone!)">🗑️ Reset Game</button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -121,17 +136,51 @@
 
             <!-- Character management screen -->
             <div id="manage-screen" class="screen">
-                <h2>Manage Characters</h2>
-                <div class="manage-controls">
-                    <div class="input-row">
-                        <input type="text" id="new-character-input" placeholder="Character (e.g., 你)" maxlength="1">
-                        <input type="text" id="new-pinyin-input" placeholder="Pinyin (e.g., nǐ)" maxlength="10">
+                <h2>Manage Game</h2>
+                
+                <!-- Data Management Section -->
+                <div class="manage-section">
+                    <h3>📚 Game Data</h3>
+                    <div class="data-status" id="data-status">
+                        <p>Current Data Source: <span id="current-data-source">Built-in</span></p>
+                        <p>Characters: <span id="data-char-count">0</span> | Phrases: <span id="data-phrase-count">0</span></p>
                     </div>
-                    <button id="add-char-btn" class="pixel-btn">Add Character</button>
+                    
+                    <div class="data-controls">
+                        <div class="upload-area" id="upload-area">
+                            <div class="upload-content">
+                                <div class="upload-icon">📁</div>
+                                <p>Drop JSON files here or <button class="link-btn" id="browse-files">browse files</button></p>
+                                <small>Supports character data, phrase data, or combined JSON files</small>
+                            </div>
+                            <input type="file" id="file-input" accept=".json" multiple style="display: none;">
+                        </div>
+                        
+                        <div class="data-buttons">
+                            <button id="switch-to-builtin" class="pixel-btn" title="Use built-in game data">📦 Use Built-in Data</button>
+                            <button id="switch-to-custom" class="pixel-btn" title="Use your custom uploaded data" disabled>📝 Use Custom Data</button>
+                            <button id="export-custom-data" class="pixel-btn" title="Download your custom data as JSON">💾 Export Custom Data</button>
+                            <button id="clear-custom-data" class="pixel-btn warning-btn" title="Delete all custom data">🗑️ Clear Custom Data</button>
+                            <button id="show-examples" class="pixel-btn" title="Show example JSON formats">📋 Show Examples</button>
+                        </div>
+                    </div>
                 </div>
-                <div id="manage-grid" class="character-grid">
-                    <!-- Managed characters will appear here -->
+
+                <!-- Character Management Section -->
+                <div class="manage-section">
+                    <h3>🀄 Character Management</h3>
+                    <div class="manage-controls">
+                        <div class="input-row">
+                            <input type="text" id="new-character-input" placeholder="Character (e.g., 你)" maxlength="1">
+                            <input type="text" id="new-pinyin-input" placeholder="Pinyin (e.g., nǐ)" maxlength="10">
+                        </div>
+                        <button id="add-char-btn" class="pixel-btn">Add Character</button>
+                    </div>
+                    <div id="manage-grid" class="character-grid">
+                        <!-- Managed characters will appear here -->
+                    </div>
                 </div>
+
                 <button id="back-to-select" class="pixel-btn">Back to Game</button>
             </div>
 
@@ -219,9 +268,96 @@
                 </div>
             </div>
         </div>
+
+        <!-- Battle Team Selection Modal -->
+        <div id="team-selection-modal" class="modal hidden">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3>⚔️ Select Battle Team</h3>
+                    <button id="team-modal-close" class="pixel-btn close-btn">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="team-selection-info">
+                        <p>Choose up to 6 characters for battle. Click characters to add/remove them from your team.</p>
+                        <div class="team-counter">
+                            <span>Team: </span>
+                            <span id="selected-count">0</span>
+                            <span>/</span>
+                            <span id="max-count">6</span>
+                        </div>
+                    </div>
+                    
+                    <div class="selected-team">
+                        <h4>Selected Team:</h4>
+                        <div id="selected-team-grid" class="character-grid small">
+                            <!-- Selected characters appear here -->
+                        </div>
+                    </div>
+                    
+                    <div class="available-characters">
+                        <h4>Available Characters:</h4>
+                        <div id="available-team-grid" class="character-grid small">
+                            <!-- Available characters appear here -->
+                        </div>
+                    </div>
+                    
+                    <div class="team-selection-buttons">
+                        <button id="start-battle-btn" class="pixel-btn battle-btn" disabled>Start Battle!</button>
+                        <button id="cancel-team-btn" class="pixel-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JSON Examples Modal -->
+        <div id="examples-modal" class="modal hidden">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3>📋 JSON Format Examples</h3>
+                    <button id="examples-modal-close" class="pixel-btn close-btn">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p>Use these formats to create your own character and phrase data files:</p>
+                    
+                    <div class="example-section">
+                        <h4>Character Data Format</h4>
+                        <pre id="character-example" class="json-example"></pre>
+                        <button class="pixel-btn small-btn" id="download-char-example">📥 Download Example</button>
+                    </div>
+                    
+                    <div class="example-section">
+                        <h4>Phrase Data Format</h4>
+                        <pre id="phrase-example" class="json-example"></pre>
+                        <button class="pixel-btn small-btn" id="download-phrase-example">📥 Download Example</button>
+                    </div>
+                    
+                    <div class="example-section">
+                        <h4>Combined Data Format</h4>
+                        <pre id="combined-example" class="json-example"></pre>
+                        <button class="pixel-btn small-btn" id="download-combined-example">📥 Download Example</button>
+                    </div>
+                    
+                    <div class="example-info">
+                        <h4>Field Descriptions:</h4>
+                        <ul>
+                            <li><strong>pinyin</strong>: Pronunciation (required)</li>
+                            <li><strong>strokes</strong>: Number of strokes (1-30, required)</li>
+                            <li><strong>difficulty</strong>: Difficulty level (1-5, required)</li>
+                            <li><strong>frequency</strong>: Usage frequency (0-100, required)</li>
+                            <li><strong>characters</strong>: Array of characters in phrase (required for phrases)</li>
+                            <li><strong>requirements</strong>: Character level requirements (required for phrases)</li>
+                            <li><strong>meaning</strong>: English meaning (required for phrases)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="practice-tracker.js"></script>
+    <script src="practice-ui.js"></script>
     <script src="game-data.js"></script>
+    <script src="data-manager.js"></script>
     <script src="game-engine.js"></script>
     <script src="game-ui.js"></script>
     <script src="main.js"></script>

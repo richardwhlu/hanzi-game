@@ -528,6 +528,7 @@ class Player {
         this.totalCharacters = data.totalCharacters || 0;
         this.totalPhrases = data.totalPhrases || 0;
         this.totalPracticeTime = data.totalPracticeTime || 0;
+        this.practiceCount = data.practiceCount || 0; // Track number of practice sessions
         this.achievements = data.achievements || [];
     }
     
@@ -556,6 +557,7 @@ class Player {
             totalCharacters: this.totalCharacters,
             totalPhrases: this.totalPhrases,
             totalPracticeTime: this.totalPracticeTime,
+            practiceCount: this.practiceCount,
             achievements: this.achievements
         };
     }

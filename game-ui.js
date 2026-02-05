@@ -5,6 +5,11 @@ class GameUI {
         this.game = game;
         this.currentScreen = 'character-select';
         this.elements = {};
+        
+        // Initialize practice tracking system
+        this.practiceTracker = new PracticeTracker();
+        this.practiceUI = new PracticeUI(this.practiceTracker, this);
+        
         this.initializeElements();
         this.bindEvents();
         this.setupGameCallbacks();
@@ -61,6 +66,37 @@ class GameUI {
         this.elements.modalItemInfo = document.getElementById('modal-item-info');
         this.elements.modalCharacterGrid = document.getElementById('modal-character-grid');
         this.elements.modalClose = document.getElementById('modal-close');
+
+        // Data management elements
+        this.elements.currentDataSource = document.getElementById('current-data-source');
+        this.elements.dataCharCount = document.getElementById('data-char-count');
+        this.elements.dataPhraseCount = document.getElementById('data-phrase-count');
+        this.elements.uploadArea = document.getElementById('upload-area');
+        this.elements.fileInput = document.getElementById('file-input');
+        this.elements.browseFiles = document.getElementById('browse-files');
+        this.elements.switchToBuiltin = document.getElementById('switch-to-builtin');
+        this.elements.switchToCustom = document.getElementById('switch-to-custom');
+        this.elements.exportCustomData = document.getElementById('export-custom-data');
+        this.elements.clearCustomData = document.getElementById('clear-custom-data');
+        this.elements.showExamples = document.getElementById('show-examples');
+        
+        // Examples modal elements
+        this.elements.examplesModal = document.getElementById('examples-modal');
+        this.elements.examplesModalClose = document.getElementById('examples-modal-close');
+        this.elements.characterExample = document.getElementById('character-example');
+        this.elements.phraseExample = document.getElementById('phrase-example');
+        this.elements.combinedExample = document.getElementById('combined-example');
+        this.elements.downloadCharExample = document.getElementById('download-char-example');
+        this.elements.downloadPhraseExample = document.getElementById('download-phrase-example');
+        this.elements.downloadCombinedExample = document.getElementById('download-combined-example');
+        
+        // Team selection modal elements
+        this.elements.teamSelectionModal = document.getElementById('team-selection-modal');
+        this.elements.teamSelectionClose = document.getElementById('team-selection-close');
+        this.elements.availableCharactersList = document.getElementById('available-characters-list');
+        this.elements.selectedTeamList = document.getElementById('selected-team-list');
+        this.elements.selectedCount = document.getElementById('selected-count');
+        this.elements.startBattleWithTeam = document.getElementById('start-battle-with-team');
     }
     
     // Bind event listeners
@@ -105,6 +141,12 @@ class GameUI {
                 this.addNewCharacter();
             }
         });
+
+        // Data management events
+        this.bindDataManagementEvents();
+        
+        // Dropdown menu events
+        this.bindDropdownEvents();
     }
     
     // Setup game engine callbacks
@@ -155,6 +197,25 @@ class GameUI {
         this.elements.playerXP.textContent = `${this.game.player.xp}/${this.game.player.getXPForNextLevel()}`;
         this.elements.characterCount.textContent = stats.totalCharacters;
         this.elements.itemCount.textContent = this.game.bag.getTotalItemCount();
+        
+        // Update battle button based on lock status
+        this.updateBattleButton();
+    }
+    
+    // Update battle button appearance based on unlock status
+    updateBattleButton() {
+        const battleBtn = document.getElementById('battle-btn');
+        const status = this.practiceTracker.getStatus();
+        
+        if (status.battleUnlocked) {
+            battleBtn.textContent = '⚔️ Battle';
+            battleBtn.title = 'Battle wild characters and phrases!';
+            battleBtn.classList.remove('locked');
+        } else {
+            battleBtn.textContent = `🔒 Battle (${status.practiceCount}/${status.practicesRequired})`;
+            battleBtn.title = `Complete ${status.practicesRemaining} more practice sessions to unlock battles`;
+            battleBtn.classList.add('locked');
+        }
     }
     
     // Refresh character selection grid
@@ -320,6 +381,14 @@ class GameUI {
     // Handle practice completion
     handlePracticeComplete(data) {
         const { character, result, playerLeveledUp, newUnlocks, sessionStats, isPhrasePractice, phraseProgress } = data;
+        
+        // Track practice completion for battle unlock system
+        if (!isPhrasePractice || (phraseProgress && phraseProgress.isLastCharacter)) {
+            const practiceResult = this.practiceTracker.incrementPracticeCount(sessionStats);
+            if (practiceResult.message) {
+                this.showMessage(practiceResult.message, practiceResult.justUnlocked ? 'success' : 'info');
+            }
+        }
         
         // Update character info display
         this.updatePracticeScreen(character);
@@ -690,15 +759,191 @@ class GameUI {
     
     // Start battle mode
     startBattle() {
+        // Check if battles are unlocked using PracticeTracker
+        if (!this.practiceTracker.isBattleUnlocked()) {
+            const status = this.practiceTracker.getStatus();
+            this.showMessage(
+                `Battles are locked! Complete ${status.practicesRemaining} more practice sessions to unlock battles. (${status.practiceCount}/${status.practicesRequired})`,
+                'info'
+            );
+            return;
+        }
+        
         const availableCharacters = this.game.getAvailableCharacters();
         if (availableCharacters.length === 0) {
             this.showMessage('You need at least one character to battle!', 'error');
             return;
         }
         
+        // Check if team selection is needed (more than 6 characters)
+        const MAX_BATTLE_TEAM_SIZE = 6;
+        if (availableCharacters.length > MAX_BATTLE_TEAM_SIZE) {
+            this.showTeamSelectionModal(availableCharacters);
+            return;
+        }
+        
+        // Start battle with all available characters (6 or fewer)
+        this.initializeBattleWithTeam(availableCharacters);
+    }
+    
+    // Show team selection modal for battles with more than 6 characters
+    showTeamSelectionModal(availableCharacters) {
+        // Initialize selection state
+        this.teamSelectionState = {
+            availableCharacters: availableCharacters,
+            selectedCharacters: [],
+            maxTeamSize: 6
+        };
+        
+        // Populate available characters list
+        this.populateAvailableCharactersList();
+        
+        // Clear selected team list and update counters
+        this.elements.selectedTeamList.innerHTML = '';
+        this.updateSelectedTeamCount();
+        
+        // Show the modal
+        this.elements.teamSelectionModal.classList.remove('hidden');
+        
+        // Bind modal events
+        this.bindTeamSelectionEvents();
+    }
+    
+    // Populate available characters list
+    populateAvailableCharactersList() {
+        this.elements.availableCharactersList.innerHTML = '';
+        
+        this.teamSelectionState.availableCharacters.forEach((character, index) => {
+            const characterElement = document.createElement('div');
+            characterElement.className = 'team-selection-character';
+            characterElement.innerHTML = `
+                <div class="character-icon">${character.char}</div>
+                <div class="character-details">
+                    <div class="character-name">${character.pinyin}</div>
+                    <div class="character-stats">
+                        Level ${character.level} | HP: ${character.hp} | ATK: ${character.attack} | DEF: ${character.defense}
+                    </div>
+                    <div class="character-accuracy">Accuracy: ${character.getAccuracy()}%</div>
+                </div>
+                <button class="select-character-btn pixel-btn" data-index="${index}">Select</button>
+            `;
+            
+            // Check if already selected
+            if (this.teamSelectionState.selectedCharacters.some(c => c.char === character.char)) {
+                characterElement.classList.add('selected');
+                const btn = characterElement.querySelector('.select-character-btn');
+                btn.textContent = 'Remove';
+                btn.classList.add('selected');
+            }
+            
+            this.elements.availableCharactersList.appendChild(characterElement);
+        });
+    }
+    
+    // Update selected team display and count
+    updateSelectedTeamCount() {
+        const count = this.teamSelectionState.selectedCharacters.length;
+        const max = this.teamSelectionState.maxTeamSize;
+        
+        this.elements.selectedCount.textContent = `${count}/${max}`;
+        
+        // Update start battle button state
+        this.elements.startBattleWithTeam.disabled = count === 0;
+        
+        // Update selected team list display
+        this.elements.selectedTeamList.innerHTML = '';
+        this.teamSelectionState.selectedCharacters.forEach(character => {
+            const teamMember = document.createElement('div');
+            teamMember.className = 'selected-team-member';
+            teamMember.innerHTML = `
+                <div class="team-member-icon">${character.char}</div>
+                <div class="team-member-name">${character.pinyin}</div>
+            `;
+            this.elements.selectedTeamList.appendChild(teamMember);
+        });
+    }
+    
+    // Bind team selection modal events
+    bindTeamSelectionEvents() {
+        // Character selection/deselection
+        this.elements.availableCharactersList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('select-character-btn')) {
+                const index = parseInt(e.target.dataset.index);
+                this.toggleCharacterSelection(index);
+            }
+        });
+        
+        // Start battle button
+        this.elements.startBattleWithTeam.addEventListener('click', () => {
+            this.confirmTeamSelection();
+        });
+        
+        // Close modal
+        this.elements.teamSelectionClose.addEventListener('click', () => {
+            this.hideTeamSelectionModal();
+        });
+        
+        // Click outside to close
+        const handleOutsideClick = (e) => {
+            if (e.target === this.elements.teamSelectionModal) {
+                this.hideTeamSelectionModal();
+                document.removeEventListener('click', handleOutsideClick);
+            }
+        };
+        
+        setTimeout(() => {
+            document.addEventListener('click', handleOutsideClick);
+        }, 100);
+    }
+    
+    // Toggle character selection
+    toggleCharacterSelection(index) {
+        const character = this.teamSelectionState.availableCharacters[index];
+        const selectedIndex = this.teamSelectionState.selectedCharacters.findIndex(c => c.char === character.char);
+        
+        if (selectedIndex === -1) {
+            // Add character to selection
+            if (this.teamSelectionState.selectedCharacters.length < this.teamSelectionState.maxTeamSize) {
+                this.teamSelectionState.selectedCharacters.push(character);
+            } else {
+                this.showMessage(`Maximum team size is ${this.teamSelectionState.maxTeamSize}!`, 'error');
+                return;
+            }
+        } else {
+            // Remove character from selection
+            this.teamSelectionState.selectedCharacters.splice(selectedIndex, 1);
+        }
+        
+        // Update UI
+        this.populateAvailableCharactersList();
+        this.updateSelectedTeamCount();
+    }
+    
+    // Confirm team selection and start battle
+    confirmTeamSelection() {
+        if (this.teamSelectionState.selectedCharacters.length === 0) {
+            this.showMessage('Please select at least one character!', 'error');
+            return;
+        }
+        
+        // Hide modal
+        this.hideTeamSelectionModal();
+        
+        // Start battle with selected team
+        this.initializeBattleWithTeam(this.teamSelectionState.selectedCharacters);
+    }
+    
+    // Hide team selection modal
+    hideTeamSelectionModal() {
+        this.elements.teamSelectionModal.classList.add('hidden');
+        this.teamSelectionState = null;
+    }
+    
+    // Initialize battle with selected team
+    initializeBattleWithTeam(selectedCharacters) {
         // Initialize battle state - always reset HP and defeated status for new battles
         this.battleState = {
-            playerCharacters: availableCharacters.map(char => ({
+            playerCharacters: selectedCharacters.map(char => ({
                 ...char,
                 currentHP: char.hp, // Reset to full HP
                 defeated: false     // Reset defeated status
@@ -882,6 +1127,10 @@ class GameUI {
         const enemy = this.battleState.enemy;
         this.addBattleMessage(`${enemy.name} is defeated!`, 'victory');
         
+        // Record battle usage to lock battles again
+        const battleLockResult = this.practiceTracker.recordBattleUsed();
+        this.addBattleMessage(battleLockResult.message, 'info');
+        
         // Add defeated opponent to collection
         const addResult = this.game.addDefeatedOpponent(enemy);
         
@@ -917,7 +1166,10 @@ class GameUI {
         const remainingCharacters = this.battleState.playerCharacters.filter(char => !char.defeated);
         
         if (remainingCharacters.length === 0) {
-            // All characters defeated
+            // All characters defeated - record battle usage to lock battles again
+            const battleLockResult = this.practiceTracker.recordBattleUsed();
+            this.addBattleMessage(battleLockResult.message, 'info');
+            
             this.addBattleMessage('All your characters are defeated! Returning to practice...', 'defeat');
             setTimeout(() => {
                 this.showScreen('character-select');
@@ -1092,6 +1344,348 @@ class GameUI {
         this.selectedItemId = null;
     }
     
+    // Bind data management events
+    bindDataManagementEvents() {
+        // File upload events
+        const uploadArea = this.elements.uploadArea;
+        const fileInput = this.elements.fileInput;
+        const browseFiles = this.elements.browseFiles;
+        
+        // Drag and drop events
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/json');
+            if (files.length > 0) {
+                this.handleFileUploads(files);
+            } else {
+                this.showMessage('Please upload JSON files only.', 'error');
+            }
+        });
+        
+        // Browse files button
+        browseFiles.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                this.handleFileUploads(files);
+            }
+            // Clear input to allow re-uploading same file
+            e.target.value = '';
+        });
+        
+        // Data source switching
+        this.elements.switchToBuiltin.addEventListener('click', () => {
+            this.switchToBuiltinData();
+        });
+        
+        this.elements.switchToCustom.addEventListener('click', () => {
+            this.switchToCustomData();
+        });
+        
+        // Export custom data
+        this.elements.exportCustomData.addEventListener('click', () => {
+            this.exportCustomData();
+        });
+        
+        // Clear custom data
+        this.elements.clearCustomData.addEventListener('click', () => {
+            this.clearCustomData();
+        });
+        
+        // Show examples
+        this.elements.showExamples.addEventListener('click', () => {
+            this.showExamples();
+        });
+        
+        // Examples modal events
+        if (this.elements.examplesModal) {
+            this.elements.examplesModalClose.addEventListener('click', () => {
+                this.hideExamples();
+            });
+            
+            // Download example buttons
+            this.elements.downloadCharExample.addEventListener('click', () => {
+                this.downloadExample('character');
+            });
+            
+            this.elements.downloadPhraseExample.addEventListener('click', () => {
+                this.downloadExample('phrase');
+            });
+            
+            this.elements.downloadCombinedExample.addEventListener('click', () => {
+                this.downloadExample('combined');
+            });
+        }
+        
+        // Initialize data status display
+        this.updateDataStatus();
+    }
+    
+    // Handle file uploads
+    async handleFileUploads(files) {
+        for (const file of files) {
+            try {
+                const text = await this.readFileAsText(file);
+                const result = this.game.dataManager.importCombinedData(text);
+                this.showMessage(result.message, 'success');
+                this.updateDataStatus();
+            } catch (error) {
+                this.showMessage(`Failed to import ${file.name}: ${error.message}`, 'error');
+            }
+        }
+    }
+    
+    // Read file as text
+    readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsText(file);
+        });
+    }
+    
+    // Switch to built-in data
+    switchToBuiltinData() {
+        try {
+            this.game.dataManager.setDataSource('built-in');
+            this.showMessage('Switched to built-in data. Reloading game...', 'success');
+            this.updateDataStatus();
+            
+            // Reinitialize game data
+            setTimeout(() => {
+                this.game.initializePhrases();
+                this.refreshCharacterGrid();
+                this.updateHeaderStats();
+            }, 500);
+            
+        } catch (error) {
+            this.showMessage(error.message, 'error');
+        }
+    }
+    
+    // Switch to custom data
+    switchToCustomData() {
+        try {
+            this.game.dataManager.setDataSource('custom');
+            this.showMessage('Switched to custom data. Reloading game...', 'success');
+            this.updateDataStatus();
+            
+            // Reinitialize game data
+            setTimeout(() => {
+                this.game.initializePhrases();
+                this.refreshCharacterGrid();
+                this.updateHeaderStats();
+            }, 500);
+            
+        } catch (error) {
+            this.showMessage(error.message, 'error');
+        }
+    }
+    
+    // Export custom data
+    exportCustomData() {
+        try {
+            const data = this.game.dataManager.exportCustomData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hanzi-game-custom-data-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showMessage('Custom data exported successfully!', 'success');
+        } catch (error) {
+            this.showMessage(`Failed to export data: ${error.message}`, 'error');
+        }
+    }
+    
+    // Clear custom data
+    clearCustomData() {
+        if (confirm('This will delete all your custom character and phrase data. This action cannot be undone. Are you sure?')) {
+            try {
+                this.game.dataManager.clearCustomData();
+                this.showMessage('Custom data cleared successfully.', 'success');
+                this.updateDataStatus();
+                
+                // Switch back to built-in data if we were using custom
+                if (this.game.dataManager.getDataSource() === 'custom') {
+                    this.switchToBuiltinData();
+                }
+            } catch (error) {
+                this.showMessage(`Failed to clear custom data: ${error.message}`, 'error');
+            }
+        }
+    }
+    
+    // Update data status display
+    updateDataStatus() {
+        const stats = this.game.dataManager.getDataStats();
+        
+        // Update current data source
+        this.elements.currentDataSource.textContent = stats.currentSource === 'built-in' ? 'Built-in' : 'Custom';
+        
+        // Update character and phrase counts
+        if (stats.currentSource === 'custom') {
+            this.elements.dataCharCount.textContent = stats.customCharacters;
+            this.elements.dataPhraseCount.textContent = stats.customPhrases;
+        } else {
+            this.elements.dataCharCount.textContent = stats.builtInCharacters;
+            this.elements.dataPhraseCount.textContent = stats.builtInPhrases;
+        }
+        
+        // Update button states
+        const hasCustomData = stats.customCharacters > 0 || stats.customPhrases > 0;
+        this.elements.switchToCustom.disabled = !hasCustomData;
+        this.elements.exportCustomData.disabled = !hasCustomData;
+        this.elements.clearCustomData.disabled = !hasCustomData;
+        
+        // Update button text to show which is active
+        this.elements.switchToBuiltin.textContent = stats.currentSource === 'built-in' ? '📦 Built-in (Active)' : '📦 Use Built-in Data';
+        this.elements.switchToCustom.textContent = stats.currentSource === 'custom' ? '📝 Custom (Active)' : '📝 Use Custom Data';
+    }
+    
+    // Show examples modal
+    showExamples() {
+        // Populate examples
+        this.elements.characterExample.textContent = JSON.stringify(this.game.dataManager.generateExampleCharacterJSON(), null, 2);
+        this.elements.phraseExample.textContent = JSON.stringify(this.game.dataManager.generateExamplePhraseJSON(), null, 2);
+        this.elements.combinedExample.textContent = JSON.stringify(this.game.dataManager.generateExampleCombinedJSON(), null, 2);
+        
+        // Show modal
+        this.elements.examplesModal.classList.remove('hidden');
+    }
+    
+    // Hide examples modal
+    hideExamples() {
+        this.elements.examplesModal.classList.add('hidden');
+    }
+    
+    // Download example file
+    downloadExample(type) {
+        let data, filename;
+        
+        switch (type) {
+            case 'character':
+                data = this.game.dataManager.generateExampleCharacterJSON();
+                filename = 'character-data-example.json';
+                break;
+            case 'phrase':
+                data = this.game.dataManager.generateExamplePhraseJSON();
+                filename = 'phrase-data-example.json';
+                break;
+            case 'combined':
+                data = this.game.dataManager.generateExampleCombinedJSON();
+                filename = 'combined-data-example.json';
+                break;
+            default:
+                return;
+        }
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.showMessage(`Downloaded ${filename}!`, 'success');
+    }
+
+    // Bind dropdown menu events
+    bindDropdownEvents() {
+        // File menu dropdown
+        const fileMenuBtn = document.getElementById('file-menu-btn');
+        const fileDropdown = fileMenuBtn.parentElement;
+        
+        // Settings menu dropdown
+        const settingsMenuBtn = document.getElementById('settings-menu-btn');
+        const settingsDropdown = settingsMenuBtn.parentElement;
+        
+        // Toggle dropdown on button click
+        fileMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileDropdown.classList.toggle('show');
+            settingsDropdown.classList.remove('show');
+        });
+        
+        settingsMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            settingsDropdown.classList.toggle('show');
+            fileDropdown.classList.remove('show');
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            fileDropdown.classList.remove('show');
+            settingsDropdown.classList.remove('show');
+        });
+        
+        // Prevent dropdown from closing when clicking inside
+        fileDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        settingsDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        // Close dropdown when item is clicked
+        const closeDropdown = (dropdown) => {
+            dropdown.classList.remove('show');
+        };
+        
+        // Add click handlers to dropdown items
+        document.getElementById('save-btn').addEventListener('click', () => {
+            this.saveGame();
+            closeDropdown(fileDropdown);
+        });
+        
+        document.getElementById('export-btn').addEventListener('click', () => {
+            this.exportGame();
+            closeDropdown(fileDropdown);
+        });
+        
+        document.getElementById('load-btn').addEventListener('click', () => {
+            this.loadGame();
+            closeDropdown(fileDropdown);
+        });
+        
+        document.getElementById('manage-btn').addEventListener('click', () => {
+            this.showScreen('manage-screen');
+            closeDropdown(settingsDropdown);
+        });
+        
+        document.getElementById('game-reset-btn').addEventListener('click', () => {
+            this.resetGame();
+            closeDropdown(settingsDropdown);
+        });
+    }
+
     // Initialize UI
     init() {
         this.showScreen('character-select');
