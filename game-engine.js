@@ -743,12 +743,14 @@ class HanziGame {
             };
         }
         
+        // Calculate level first (needed for stat calculations)
+        battleOpponent.level = this.calculateOpponentLevel(battleOpponent);
+        
         // Calculate battle stats
         battleOpponent.maxHP = this.calculateOpponentHP(battleOpponent);
         battleOpponent.currentHP = battleOpponent.maxHP;
         battleOpponent.attack = this.calculateOpponentAttack(battleOpponent);
         battleOpponent.defense = this.calculateOpponentDefense(battleOpponent);
-        battleOpponent.level = this.calculateOpponentLevel(battleOpponent);
         
         return battleOpponent;
     }
