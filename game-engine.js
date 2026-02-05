@@ -5,6 +5,7 @@ class HanziGame {
         this.player = null;
         this.characters = {};
         this.phrases = {};
+        this.bag = null;
         this.currentCharacter = null;
         this.currentWriter = null;
         this.practiceStartTime = null;
@@ -38,6 +39,9 @@ class HanziGame {
                 const data = JSON.parse(savedData);
                 this.player = new Player(data.player);
                 
+                // Load bag
+                this.bag = new Bag(data.bag);
+                
                 // Load characters
                 for (const [char, charData] of Object.entries(data.characters || {})) {
                     this.characters[char] = new Character(char, charData);
@@ -61,6 +65,7 @@ class HanziGame {
     // Create a new game with default data
     createNewGame() {
         this.player = new Player();
+        this.bag = new Bag();
         
         // Add some starter characters
         const starters = ['你', '好', '我'];
@@ -71,6 +76,10 @@ class HanziGame {
         }
         
         this.player.totalCharacters = Object.keys(this.characters).length;
+        
+        // Give starter XP boost items
+        this.bag.addItem('xp_boost_small', 2);
+        
         console.log('New game created');
     }
     
@@ -521,6 +530,7 @@ class HanziGame {
     saveGame() {
         const saveData = {
             player: this.player.toJSON(),
+            bag: this.bag.toJSON(),
             characters: {},
             phrases: {}
         };
@@ -550,6 +560,7 @@ class HanziGame {
             const data = JSON.parse(jsonData);
             
             this.player = new Player(data.player);
+            this.bag = new Bag(data.bag);
             this.characters = {};
             this.phrases = {};
             
@@ -575,6 +586,7 @@ class HanziGame {
     exportToJSON() {
         const saveData = {
             player: this.player.toJSON(),
+            bag: this.bag.toJSON(),
             characters: {},
             phrases: {},
             exportDate: new Date().toISOString()
@@ -890,6 +902,8 @@ class HanziGame {
     
     // Add defeated opponent to player's collection
     addDefeatedOpponent(opponent) {
+        const captureResult = {};
+        
         if (opponent.isPhrase) {
             // Add phrase to collection if not already there
             if (!this.phrases[opponent.name]) {
@@ -901,16 +915,140 @@ class HanziGame {
             this.phrases[opponent.name].xp = 0;
             this.player.totalPhrases++;
             
-            return { type: 'phrase', name: opponent.name };
+            captureResult.type = 'phrase';
+            captureResult.name = opponent.name;
         } else {
             // Add character to collection if not already there
             if (!this.characters[opponent.name]) {
                 // Force level 1 for captured characters
                 const captureData = { ...opponent.originalData, level: 1, xp: 0 };
                 const result = this.addCharacter(opponent.name, captureData);
-                return { type: 'character', name: opponent.name, success: result.success };
+                captureResult.type = 'character';
+                captureResult.name = opponent.name;
+                captureResult.success = result.success;
+            } else {
+                captureResult.type = 'character';
+                captureResult.name = opponent.name;
+                captureResult.success = false;
+                captureResult.message = 'Already owned';
             }
-            return { type: 'character', name: opponent.name, success: false, message: 'Already owned' };
         }
+        
+        // Check for item drops
+        const itemDrops = this.rollForItemDrops(opponent);
+        if (itemDrops.length > 0) {
+            captureResult.itemDrops = itemDrops;
+        }
+        
+        return captureResult;
+    }
+    
+    // Roll for item drops after defeating an enemy
+    rollForItemDrops(opponent) {
+        const drops = [];
+        
+        // Base drop chance: 25% for any item
+        if (Math.random() < 0.25) {
+            // Determine item rarity based on opponent level and difficulty
+            let itemId;
+            const rarityRoll = Math.random();
+            
+            // Higher level enemies drop better items
+            const levelModifier = Math.min(0.3, opponent.level * 0.05); // Up to +30% for rare items
+            const difficultyModifier = opponent.difficulty * 0.05; // +5% per difficulty level
+            
+            const adjustedRarityRoll = rarityRoll + levelModifier + difficultyModifier;
+            
+            if (adjustedRarityRoll < 0.15) {
+                // 15% chance for large XP boost (rare)
+                itemId = 'xp_boost_large';
+            } else if (adjustedRarityRoll < 0.45) {
+                // 30% chance for medium XP boost (uncommon)
+                itemId = 'xp_boost_medium';
+            } else {
+                // 55% chance for small XP boost (common)
+                itemId = 'xp_boost_small';
+            }
+            
+            // Add item to bag
+            const addResult = this.bag.addItem(itemId, 1);
+            if (addResult.success) {
+                drops.push({
+                    itemId: itemId,
+                    item: addResult.item,
+                    quantity: 1
+                });
+                
+                console.log(`Item drop: ${addResult.item.name}`);
+            } else {
+                console.log(`Bag full - item drop lost: ${itemId}`);
+            }
+        }
+        
+        return drops;
+    }
+    
+    // ITEM MANAGEMENT METHODS
+    
+    // Use an item from the bag on a character
+    useItem(itemId, characterName) {
+        if (!this.characters[characterName]) {
+            return { success: false, message: 'Character not found' };
+        }
+        
+        const character = this.characters[characterName];
+        const result = this.bag.useItem(itemId, character);
+        
+        if (result.success) {
+            // Update character stats after using item
+            character.hp = character.calculateHP();
+            character.attack = character.calculateAttack();
+            character.defense = character.calculateDefense();
+            
+            // Save game after item use
+            this.saveGame();
+        }
+        
+        return result;
+    }
+    
+    // Get all items in the bag
+    getBagItems() {
+        return this.bag.getAllItems();
+    }
+    
+    // Get items by type (useful for UI filtering)
+    getItemsByType(type) {
+        return this.bag.getItemsByType(type);
+    }
+    
+    // Get bag status information
+    getBagStatus() {
+        return {
+            totalItems: this.bag.getTotalItemCount(),
+            maxSlots: this.bag.maxSlots,
+            hasSpace: this.bag.hasSpace(),
+            itemTypes: {
+                xp_boosts: this.bag.getItemsByType('xp_boost').length
+            }
+        };
+    }
+    
+    // Add an item to the bag (for admin/testing purposes)
+    addItemToBag(itemId, quantity = 1) {
+        const result = this.bag.addItem(itemId, quantity);
+        if (result.success) {
+            this.saveGame();
+        }
+        return result;
+    }
+    
+    // Remove an item from the bag
+    removeItemFromBag(itemId, quantity = 1) {
+        const result = this.bag.removeItem(itemId, quantity);
+        if (result.success) {
+            this.saveGame();
+        }
+        return result;
     }
 }

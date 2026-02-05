@@ -80,6 +80,192 @@ const DEFAULT_PHRASES = {
     }
 };
 
+// Default items that can be found/earned
+const DEFAULT_ITEMS = {
+    'xp_boost_small': {
+        id: 'xp_boost_small',
+        name: 'Small XP Boost',
+        description: 'Grants 100 XP to a character',
+        type: 'xp_boost',
+        value: 100,
+        rarity: 'common',
+        icon: '🔮'
+    },
+    'xp_boost_medium': {
+        id: 'xp_boost_medium',
+        name: 'Medium XP Boost',
+        description: 'Grants 200 XP to a character',
+        type: 'xp_boost',
+        value: 200,
+        rarity: 'uncommon',
+        icon: '💎'
+    },
+    'xp_boost_large': {
+        id: 'xp_boost_large',
+        name: 'Large XP Boost',
+        description: 'Grants 700 XP to a character',
+        type: 'xp_boost',
+        value: 700,
+        rarity: 'rare',
+        icon: '⭐'
+    }
+};
+
+// Item class
+class Item {
+    constructor(itemId, data = {}) {
+        const itemData = DEFAULT_ITEMS[itemId] || data;
+        
+        this.id = itemData.id || itemId;
+        this.name = itemData.name || 'Unknown Item';
+        this.description = itemData.description || '';
+        this.type = itemData.type || 'misc';
+        this.value = itemData.value || 0;
+        this.rarity = itemData.rarity || 'common';
+        this.icon = itemData.icon || '📦';
+        this.quantity = data.quantity || 1;
+    }
+    
+    // Use the item on a character (for XP boosts)
+    use(character) {
+        if (this.type === 'xp_boost' && character) {
+            const leveledUp = character.addXP(this.value);
+            this.quantity = Math.max(0, this.quantity - 1);
+            
+            return {
+                success: true,
+                xpGained: this.value,
+                leveledUp: leveledUp,
+                remainingQuantity: this.quantity
+            };
+        }
+        
+        return { success: false, message: 'Cannot use this item' };
+    }
+    
+    // Add more of this item
+    addQuantity(amount = 1) {
+        this.quantity += amount;
+        return this.quantity;
+    }
+    
+    toJSON() {
+        return {
+            id: this.id,
+            name: this.name,
+            description: this.description,
+            type: this.type,
+            value: this.value,
+            rarity: this.rarity,
+            icon: this.icon,
+            quantity: this.quantity
+        };
+    }
+}
+
+// Player bag/inventory system
+class Bag {
+    constructor(data = {}) {
+        this.items = {};
+        this.maxSlots = data.maxSlots || 50; // Default bag size
+        
+        // Load existing items
+        if (data.items) {
+            for (const [itemId, itemData] of Object.entries(data.items)) {
+                this.items[itemId] = new Item(itemId, itemData);
+            }
+        }
+    }
+    
+    // Add an item to the bag
+    addItem(itemId, quantity = 1) {
+        if (this.items[itemId]) {
+            // Item already exists, add to quantity
+            this.items[itemId].addQuantity(quantity);
+        } else {
+            // New item, check if we have space
+            if (Object.keys(this.items).length >= this.maxSlots) {
+                return { success: false, message: 'Bag is full!' };
+            }
+            
+            this.items[itemId] = new Item(itemId, { quantity: quantity });
+        }
+        
+        return { 
+            success: true, 
+            item: this.items[itemId], 
+            totalQuantity: this.items[itemId].quantity 
+        };
+    }
+    
+    // Remove an item from the bag
+    removeItem(itemId, quantity = 1) {
+        if (!this.items[itemId]) {
+            return { success: false, message: 'Item not found' };
+        }
+        
+        const item = this.items[itemId];
+        if (item.quantity < quantity) {
+            return { success: false, message: 'Not enough items' };
+        }
+        
+        item.quantity -= quantity;
+        
+        // Remove item completely if quantity reaches 0
+        if (item.quantity <= 0) {
+            delete this.items[itemId];
+        }
+        
+        return { success: true, removedQuantity: quantity };
+    }
+    
+    // Use an item from the bag
+    useItem(itemId, character = null) {
+        if (!this.items[itemId]) {
+            return { success: false, message: 'Item not found' };
+        }
+        
+        const item = this.items[itemId];
+        const result = item.use(character);
+        
+        // Remove item from bag if it was used up
+        if (result.success && item.quantity <= 0) {
+            delete this.items[itemId];
+        }
+        
+        return result;
+    }
+    
+    // Get all items in the bag
+    getAllItems() {
+        return Object.values(this.items);
+    }
+    
+    // Get items by type
+    getItemsByType(type) {
+        return Object.values(this.items).filter(item => item.type === type);
+    }
+    
+    // Check if bag has space
+    hasSpace() {
+        return Object.keys(this.items).length < this.maxSlots;
+    }
+    
+    // Get total number of items (counting quantities)
+    getTotalItemCount() {
+        return Object.values(this.items).reduce((total, item) => total + item.quantity, 0);
+    }
+    
+    toJSON() {
+        return {
+            maxSlots: this.maxSlots,
+            items: Object.fromEntries(
+                Object.entries(this.items).map(([id, item]) => [id, item.toJSON()])
+            )
+        };
+    }
+}
+
 // Character progression class
 class Character {
     constructor(char, data = {}) {
