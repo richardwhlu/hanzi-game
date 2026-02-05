@@ -339,10 +339,15 @@ class Character {
     
     // Add XP and handle level ups
     addXP(amount) {
+        // Stop gaining XP if already at max level
+        if (this.level >= 10) {
+            return false;
+        }
+        
         this.xp += amount;
         let leveledUp = false;
         
-        while (this.xp >= this.getXPForNextLevel()) {
+        while (this.xp >= this.getXPForNextLevel() && this.level < 10) {
             const xpNeeded = this.getXPForNextLevel(); // Get XP needed BEFORE leveling up
             this.xp -= xpNeeded;
             this.level++;
@@ -352,6 +357,12 @@ class Character {
             this.hp = this.calculateHP();
             this.attack = this.calculateAttack();
             this.defense = this.calculateDefense();
+            
+            // If we just reached max level, reset excess XP to 0
+            if (this.level >= 10) {
+                this.xp = 0;
+                break;
+            }
         }
         
         return leveledUp;
@@ -474,12 +485,22 @@ class Phrase {
         const firstTimeBonus = isFirstCompletion ? 50 : 0; // Extra XP for first time completion
         
         const xpGained = baseXP + sequenceBonus + firstTimeBonus;
+        
+        // Stop gaining XP if already at max level
+        if (this.level >= 10) {
+            return {
+                xpGained: 0,
+                leveledUp: false,
+                isFirstCompletion: isFirstCompletion
+            };
+        }
+        
         this.xp += xpGained;
         
         // Check for level up
         let leveledUp = false;
-        const xpRequired = this.getXPForNextLevel();
-        if (this.xp >= xpRequired) {
+        while (this.xp >= this.getXPForNextLevel() && this.level < 10) {
+            const xpRequired = this.getXPForNextLevel();
             this.xp -= xpRequired;
             this.level++;
             leveledUp = true;
@@ -488,10 +509,16 @@ class Phrase {
             this.hp = this.calculateHP();
             this.attack = this.calculateAttack();
             this.defense = this.calculateDefense();
+            
+            // If we just reached max level, reset excess XP to 0
+            if (this.level >= 10) {
+                this.xp = 0;
+                break;
+            }
         }
         
         return {
-            xpGained: xpGained,
+            xpGained: this.level >= 10 ? 0 : xpGained,
             leveledUp: leveledUp,
             isFirstCompletion: isFirstCompletion
         };

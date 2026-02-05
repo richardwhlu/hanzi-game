@@ -434,6 +434,53 @@ body {
     border: 2px solid var(--gbc-yellow);
 }
 
+/* Max level styling for level 10 characters/phrases */
+.character-card.max-level {
+    background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+    border: 3px solid #B8860B;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.character-card.max-level:hover {
+    background: linear-gradient(135deg, #FFED4A, #FFD700, #FFED4A);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+}
+
+.character-card.max-level .character-display {
+    background: linear-gradient(45deg, #B8860B, #DAA520);
+    color: var(--gbc-lightest);
+    text-shadow: 2px 2px 0 #8B7355;
+    border: 2px solid #FFED4A;
+    font-weight: bold;
+}
+
+.character-card.max-level .character-level::after {
+    content: " ⭐";
+    color: #FFED4A;
+    text-shadow: 1px 1px 0 #B8860B;
+}
+
+.character-card.max-level::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700, #FFA500);
+    z-index: -1;
+    border-radius: inherit;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
 /* Battle system styles */
 .battle-btn {
     background: linear-gradient(135deg, var(--gbc-red), var(--gbc-purple));

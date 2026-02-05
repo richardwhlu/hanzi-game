@@ -252,9 +252,16 @@ class GameUI {
     // Create character card element
     createCharacterCard(character, clickable = false) {
         const card = document.createElement('div');
-        card.className = character.isPhraseCharacter ? 'character-card phrase-character' : 'character-card';
+        let cardClass = character.isPhraseCharacter ? 'character-card phrase-character' : 'character-card';
         
-        const progressWidth = (character.xp / character.getXPForNextLevel()) * 100;
+        // Add max-level class for level 10 characters
+        if (character.level >= 10) {
+            cardClass += ' max-level';
+        }
+        
+        card.className = cardClass;
+        
+        const progressWidth = character.level >= 10 ? 100 : (character.xp / character.getXPForNextLevel()) * 100;
         
         // Remove sparkle indicator, show level for all characters
         const phraseIndicator = '';
@@ -264,7 +271,7 @@ class GameUI {
             <div class="character-display">${phraseIndicator}${character.char}</div>
             <div class="character-info">
                 <div><strong>${character.pinyin}</strong></div>
-                <div>${characterType}</div>
+                <div class="character-level">${characterType}</div>
                 <div>HP: ${character.hp} | ATK: ${character.attack} | DEF: ${character.defense}</div>
                 <div>Accuracy: ${character.getAccuracy()}%</div>
                 <div style="background: #ddd; height: 4px; margin: 4px 0;">
