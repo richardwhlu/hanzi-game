@@ -1219,14 +1219,40 @@ class GameUI {
         }
     }
     
-    // Generate new enemy - DISABLED: Battles should end after each completion
+    // Generate new enemy during active battle
     generateNewEnemy() {
-        // This functionality is disabled to enforce the battle lock system
-        // Users must return to practice after each battle
-        this.addBattleMessage('Battle complete! You must return to practice to unlock more battles.', 'info');
-        setTimeout(() => {
-            this.showScreen('character-select');
-        }, 2000);
+        // Only allow finding new opponents during active battle (not after victory/defeat)
+        if (!this.battleState || !this.battleState.currentPlayerCharacter || 
+            this.battleState.currentPlayerCharacter.defeated ||
+            this.elements.attackBtn.textContent === 'Victory!') {
+            this.addBattleMessage('Cannot find new opponent - battle is not active.', 'info');
+            return;
+        }
+        
+        // Check if all player characters are defeated
+        const aliveCharacters = this.battleState.playerCharacters.filter(char => !char.defeated);
+        if (aliveCharacters.length === 0) {
+            this.addBattleMessage('Cannot find new opponent - no characters available to battle.', 'info');
+            return;
+        }
+        
+        // Generate a new enemy
+        const newEnemy = this.game.generateWildOpponent();
+        
+        // Update battle state
+        this.battleState.enemy = newEnemy;
+        
+        // Re-render the new enemy
+        this.renderBattleCharacter(newEnemy, 'enemy');
+        
+        // Add message to battle log
+        this.addBattleMessage(`A new wild ${newEnemy.name} appears to challenge you!`, 'info');
+        
+        // Ensure attack button is enabled for the new fight (unless temporarily disabled during animation)
+        if (this.elements.attackBtn.textContent !== 'Attack!') {
+            this.elements.attackBtn.textContent = 'Attack!';
+        }
+        // Don't force enable if it's temporarily disabled during combat animation
     }
     
     // Add message to battle log
