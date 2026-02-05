@@ -924,16 +924,19 @@ class GameUI {
     
     // Confirm team selection and start battle
     confirmTeamSelection() {
-        if (this.teamSelectionState.selectedCharacters.length === 0) {
+        if (!this.teamSelectionState || this.teamSelectionState.selectedCharacters.length === 0) {
             this.showMessage('Please select at least one character!', 'error');
             return;
         }
+        
+        // Store selected characters before hiding modal
+        const selectedCharacters = this.teamSelectionState.selectedCharacters;
         
         // Hide modal
         this.hideTeamSelectionModal();
         
         // Start battle with selected team
-        this.initializeBattleWithTeam(this.teamSelectionState.selectedCharacters);
+        this.initializeBattleWithTeam(selectedCharacters);
     }
     
     // Hide team selection modal
