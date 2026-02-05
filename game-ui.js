@@ -402,6 +402,9 @@ class GameUI {
         // Update character info display
         this.updatePracticeScreen(character);
         
+        // Update header stats including battle button progress (real-time updates)
+        this.updateHeaderStats();
+        
         // Show XP feedback
         this.elements.xpAmount.textContent = result.xpGained;
         this.elements.accuracyPercent.textContent = sessionStats.accuracy;
