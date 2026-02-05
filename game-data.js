@@ -445,28 +445,31 @@ class Phrase {
         });
     }
     
-    // Calculate combined HP from characters
+    // Calculate combined HP from characters - Enhanced for stronger phrases
     calculateHP() {
-        const baseHP = 50;
-        const characterBonus = this.characters.length * 20;
-        const levelBonus = (this.level - 1) * 10;
-        return baseHP + characterBonus + levelBonus;
+        const baseHP = 60; // Higher base than single characters (20)
+        const characterBonus = this.characters.length * 25; // Higher per-character bonus
+        const levelBonus = (this.level - 1) * 15; // 50% more per level than single characters (10)
+        const phraseBonus = this.characters.length >= 3 ? 20 : 10; // Bonus for longer phrases
+        return baseHP + characterBonus + levelBonus + phraseBonus;
     }
     
-    // Calculate combined attack
+    // Calculate combined attack - Enhanced for stronger phrases  
     calculateAttack() {
-        const baseAttack = 15;
-        const difficultyBonus = this.difficulty * 5;
-        const levelBonus = (this.level - 1) * 3;
-        return baseAttack + difficultyBonus + levelBonus;
+        const baseAttack = 18; // Higher base than single characters (10)
+        const difficultyBonus = this.difficulty * 6; // Higher difficulty scaling
+        const levelBonus = (this.level - 1) * 4; // Double level bonus vs single characters (2)
+        const lengthBonus = Math.floor(this.characters.length / 2) * 3; // Bonus for longer phrases
+        return baseAttack + difficultyBonus + levelBonus + lengthBonus;
     }
     
-    // Calculate combined defense
+    // Calculate combined defense - Enhanced for stronger phrases
     calculateDefense() {
-        const baseDefense = 12;
-        const frequencyBonus = 15 - Math.floor(this.frequency / 15);
-        const levelBonus = (this.level - 1) * 3;
-        return baseDefense + frequencyBonus + levelBonus;
+        const baseDefense = 15; // Higher base than single characters (8)
+        const frequencyBonus = 18 - Math.floor(this.frequency / 12); // Better frequency scaling
+        const levelBonus = (this.level - 1) * 4; // Double level bonus vs single characters (2)
+        const complexityBonus = this.characters.length >= 3 ? 5 : 2; // Bonus for complex phrases
+        return baseDefense + frequencyBonus + levelBonus + complexityBonus;
     }
     
     // Record a phrase practice session

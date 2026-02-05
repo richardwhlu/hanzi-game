@@ -468,6 +468,37 @@ class HanziGame {
             }
         }
         
+        // Update phrase character practice statistics for accuracy tracking
+        const phraseCharacter = this.characters[this.currentPhrase.text];
+        if (phraseCharacter && phraseCharacter.isPhraseCharacter) {
+            // Track practice session for phrase character
+            phraseCharacter.totalPractices++;
+            
+            // Calculate combined accuracy from all characters in the phrase
+            let totalAccuracy = 0;
+            let characterCount = 0;
+            
+            for (const charText of this.currentPhrase.characters) {
+                const char = this.characters[charText];
+                if (char) {
+                    totalAccuracy += char.getAccuracy();
+                    characterCount++;
+                }
+            }
+            
+            // Use average accuracy from component characters
+            const averageAccuracy = characterCount > 0 ? totalAccuracy / characterCount : 0;
+            
+            // Estimate mistakes based on accuracy (lower accuracy = more mistakes)
+            const estimatedMistakes = Math.floor((100 - averageAccuracy) * 0.1 * this.currentPhrase.characters.length);
+            phraseCharacter.totalMistakes += Math.max(0, estimatedMistakes);
+            
+            // Update best accuracy if this session was better
+            if (averageAccuracy > phraseCharacter.bestAccuracy) {
+                phraseCharacter.bestAccuracy = Math.floor(averageAccuracy);
+            }
+        }
+        
         // Reset phrase state
         this.currentPhrase = null;
         this.currentPhraseIndex = 0;
