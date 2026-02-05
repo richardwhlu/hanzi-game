@@ -988,6 +988,11 @@ class GameUI {
     
     // Initialize battle screen UI
     initializeBattleScreen() {
+        // Reset attack button state and text for new battle
+        this.elements.attackBtn.disabled = false;
+        this.elements.attackBtn.textContent = 'Attack!';
+        this.elements.findOpponentBtn.disabled = false;
+        
         // Setup event listeners for battle
         this.setupBattleEvents();
         
