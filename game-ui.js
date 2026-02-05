@@ -214,7 +214,9 @@ class GameUI {
             battleBtn.title = 'Battle wild characters and phrases!';
             battleBtn.classList.remove('locked');
         } else {
-            battleBtn.textContent = `🔒 Battle (${status.practiceCount}/${status.practicesRequired})`;
+            // Show progress since last battle if battles have been used, otherwise show total progress
+            const practicesShown = status.battleUsageCount > 0 ? status.practicesSinceBattle : status.practiceCount;
+            battleBtn.textContent = `🔒 Battle (${practicesShown}/${status.practicesRequired})`;
             battleBtn.title = `Complete ${status.practicesRemaining} more practice sessions to unlock battles`;
             battleBtn.classList.add('locked');
         }
@@ -1153,13 +1155,20 @@ class GameUI {
             });
         }
         
-        // Update game stats
+        // Update game stats and battle button
         this.updateHeaderStats();
         
-        // Disable attack button and suggest actions
+        // Disable all battle controls - battle is over
         this.elements.attackBtn.disabled = true;
+        this.elements.findOpponentBtn.disabled = true;
         this.elements.attackBtn.textContent = 'Victory!';
-        this.addBattleMessage('Find a new opponent or return to practice!', 'info');
+        
+        // Force return to practice after victory
+        this.addBattleMessage('Battle complete! Returning to practice to unlock more battles...', 'info');
+        setTimeout(() => {
+            this.showScreen('character-select');
+            this.showMessage('Victory! Complete 10 more practice sessions to battle again.', 'success');
+        }, 3000);
     }
     
     // Handle player character defeated
@@ -1191,15 +1200,14 @@ class GameUI {
         }
     }
     
-    // Generate new enemy
+    // Generate new enemy - DISABLED: Battles should end after each completion
     generateNewEnemy() {
-        this.battleState.enemy = this.game.generateWildOpponent();
-        this.renderBattleCharacter(this.battleState.enemy, 'enemy');
-        this.addBattleMessage(`A wild ${this.battleState.enemy.name} appears!`, 'info');
-        
-        // Reset attack button
-        this.elements.attackBtn.disabled = false;
-        this.elements.attackBtn.textContent = 'Attack!';
+        // This functionality is disabled to enforce the battle lock system
+        // Users must return to practice after each battle
+        this.addBattleMessage('Battle complete! You must return to practice to unlock more battles.', 'info');
+        setTimeout(() => {
+            this.showScreen('character-select');
+        }, 2000);
     }
     
     // Add message to battle log

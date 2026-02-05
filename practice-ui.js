@@ -16,6 +16,7 @@ class PracticeUI {
         // Bind callbacks
         this.practiceTracker.onPracticeCountChanged = this.onPracticeCountChanged.bind(this);
         this.practiceTracker.onBattleUnlocked = this.onBattleUnlocked.bind(this);
+        this.practiceTracker.onBattleLocked = this.onBattleLocked.bind(this);
         
         this.init();
     }
@@ -326,12 +327,16 @@ class PracticeUI {
         const progressText = document.getElementById('progress-text');
         const progressTooltip = document.getElementById('progress-tooltip');
         
+        // Use battle-specific progress methods for accurate display
+        const battleProgressPercentage = this.practiceTracker.getBattleProgressPercentage();
+        const battleProgressCount = this.practiceTracker.getBattleProgressCount();
+        
         if (progressFill) {
-            progressFill.style.width = status.progressPercentage + '%';
+            progressFill.style.width = battleProgressPercentage + '%';
         }
         
         if (progressText) {
-            progressText.textContent = `${status.practiceCount}/${status.practicesRequired}`;
+            progressText.textContent = `${battleProgressCount}/${status.practicesRequired}`;
         }
         
         if (progressTooltip) {
@@ -377,6 +382,15 @@ class PracticeUI {
         }
         
         console.log('Battle mode unlocked!', result);
+    }
+    
+    /**
+     * Callback for battle locked (after battle usage)
+     */
+    onBattleLocked(result) {
+        this.updateUI();
+        
+        console.log('Battle mode locked after use:', result);
     }
     
     /**

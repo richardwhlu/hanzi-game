@@ -252,6 +252,44 @@ class PracticeTracker {
     }
     
     /**
+     * Get battle-specific progress as a percentage (0-100)
+     * This shows progress toward the next battle unlock, considering battle usage
+     * @returns {number} - Progress percentage for battle unlock
+     */
+    getBattleProgressPercentage() {
+        if (this.isBattleUnlocked()) {
+            return 100;
+        }
+        
+        // If haven't reached initial unlock, show total progress
+        if (this.practiceCount < this.PRACTICES_REQUIRED) {
+            return Math.floor((this.practiceCount / this.PRACTICES_REQUIRED) * 100);
+        }
+        
+        // If battles were used, show progress since last battle
+        if (this.battleUsageCount > 0) {
+            return Math.floor((this.practicesSinceBattle / this.PRACTICES_REQUIRED) * 100);
+        }
+        
+        return 100;
+    }
+    
+    /**
+     * Get the practice count to display for battle progress
+     * This shows the relevant count based on current battle status
+     * @returns {number} - Practice count for display
+     */
+    getBattleProgressCount() {
+        // If battles have been used, show progress since last battle
+        if (this.battleUsageCount > 0) {
+            return this.practicesSinceBattle;
+        }
+        
+        // Otherwise show total progress toward first unlock
+        return this.practiceCount;
+    }
+    
+    /**
      * Get comprehensive status object
      * @returns {Object} - Complete status information
      */
