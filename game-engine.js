@@ -1260,8 +1260,19 @@ class HanziGame {
         // Reset phrase practice state
         this.currentPhraseSequence = null;
         
-        // Reinitialize with default starter characters
-        this.initializeStarterCharacters();
+        // Add some starter characters from active character data
+        const activeCharacterData = this.dataManager.getActiveCharacterData();
+        const starters = ['你', '好', '我'];
+        for (const char of starters) {
+            if (activeCharacterData[char]) {
+                this.characters[char] = new Character(char, activeCharacterData[char]);
+            }
+        }
+        
+        this.player.totalCharacters = Object.keys(this.characters).length;
+        
+        // Give starter XP boost items
+        this.bag.addItem('xp_boost_small', 2);
         
         // Reinitialize phrases
         this.initializePhrases();

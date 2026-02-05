@@ -108,7 +108,7 @@ class GameUI {
         document.getElementById('battle-btn').addEventListener('click', () => this.startBattle());
         // Note: File menu buttons (save, export, load) are handled in setupDropdownMenus()
         document.getElementById('manage-btn').addEventListener('click', () => this.showScreen('manage-screen'));
-        document.getElementById('game-reset-btn').addEventListener('click', () => this.resetGame());
+        // Note: game-reset-btn event listener is set up in initializeSettingsDropdown() to include dropdown closing
         
         // Navigation events
         document.getElementById('back-btn').addEventListener('click', () => this.showScreen('character-select'));
