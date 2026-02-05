@@ -642,12 +642,69 @@ class HanziGame {
             return this.generateRandomOpponent();
         }
         
-        // Pick a random opponent
-        const randomIndex = Math.floor(Math.random() * allOpponents.length);
-        const opponent = allOpponents[randomIndex];
+        // Pick an opponent with stroke-based weighting for early game progression
+        const opponent = this.selectWeightedOpponent(allOpponents);
         
         // Create battle-ready opponent with stats
         return this.createBattleOpponent(opponent);
+    }
+    
+    // Select opponent with preference for simpler characters early in game
+    selectWeightedOpponent(opponents) {
+        const { averageLevel } = this.getPlayerLevelStats();
+        
+        // In early game, heavily favor simpler characters
+        if (averageLevel <= 3) {
+            // Create weighted array based on stroke count (lower strokes = higher weight)
+            const weightedOpponents = [];
+            
+            opponents.forEach(opponent => {
+                const strokes = opponent.strokes || (opponent.characters ? 
+                    opponent.characters.reduce((total, char) => {
+                        const charData = DEFAULT_CHARACTERS[char];
+                        return total + (charData ? charData.strokes : 5);
+                    }, 0) : 10);
+                
+                // Weight: simpler characters appear more often
+                let weight = 1;
+                if (strokes <= 3) weight = 8;       // Very simple: 8x more likely
+                else if (strokes <= 6) weight = 4;  // Simple: 4x more likely
+                else if (strokes <= 10) weight = 2; // Medium: 2x more likely
+                else weight = 1;                    // Complex: normal chance
+                
+                // Add multiple copies based on weight
+                for (let i = 0; i < weight; i++) {
+                    weightedOpponents.push(opponent);
+                }
+            });
+            
+            // Pick from weighted array
+            const randomIndex = Math.floor(Math.random() * weightedOpponents.length);
+            return weightedOpponents[randomIndex];
+        } else {
+            // Mid-late game: more balanced selection but still slight preference for simpler
+            const weightedOpponents = [];
+            
+            opponents.forEach(opponent => {
+                const strokes = opponent.strokes || (opponent.characters ? 
+                    opponent.characters.reduce((total, char) => {
+                        const charData = DEFAULT_CHARACTERS[char];
+                        return total + (charData ? charData.strokes : 5);
+                    }, 0) : 10);
+                
+                // Lighter weighting in late game
+                let weight = 1;
+                if (strokes <= 6) weight = 2;      // Simple: 2x more likely
+                else weight = 1;                   // Everything else: normal
+                
+                for (let i = 0; i < weight; i++) {
+                    weightedOpponents.push(opponent);
+                }
+            });
+            
+            const randomIndex = Math.floor(Math.random() * weightedOpponents.length);
+            return weightedOpponents[randomIndex];
+        }
     }
     
     // Create a battle-ready opponent from character/phrase data
@@ -711,49 +768,85 @@ class HanziGame {
         });
     }
     
-    // Calculate opponent stats based on player's average level
+    // Calculate opponent stats based on player's character levels
     calculateOpponentHP(opponent) {
-        const playerAvgLevel = this.getPlayerAverageLevel();
-        const baseHP = opponent.isPhrase ? 80 : 50;
-        const strokeBonus = opponent.strokes * 4;
-        const levelVariation = Math.floor(Math.random() * 10) - 5; // ±5 levels
-        const effectiveLevel = Math.max(1, playerAvgLevel + levelVariation);
-        const levelBonus = effectiveLevel * 8;
+        const baseHP = opponent.isPhrase ? 50 : 20;
+        const strokeBonus = opponent.strokes * 3;
+        const levelBonus = (opponent.level - 1) * 5;
         
         return baseHP + strokeBonus + levelBonus;
     }
     
     calculateOpponentAttack(opponent) {
-        const playerAvgLevel = this.getPlayerAverageLevel();
-        const baseAttack = opponent.isPhrase ? 25 : 15;
-        const difficultyBonus = opponent.difficulty * 3;
-        const levelBonus = playerAvgLevel * 2;
+        const baseAttack = opponent.isPhrase ? 15 : 10;
+        const difficultyBonus = opponent.difficulty * (opponent.isPhrase ? 5 : 4);
+        const levelBonus = (opponent.level - 1) * (opponent.isPhrase ? 3 : 2);
         
         return baseAttack + difficultyBonus + levelBonus;
     }
     
     calculateOpponentDefense(opponent) {
-        const playerAvgLevel = this.getPlayerAverageLevel();
-        const baseDefense = opponent.isPhrase ? 20 : 12;
-        const frequencyBonus = Math.floor(opponent.frequency / 20);
-        const levelBonus = playerAvgLevel * 2;
+        const baseDefense = opponent.isPhrase ? 12 : 8;
+        const frequencyBonus = Math.max(0, 10 - Math.floor(opponent.frequency / 10));
+        const levelBonus = (opponent.level - 1) * (opponent.isPhrase ? 3 : 2);
         
         return baseDefense + frequencyBonus + levelBonus;
     }
     
     calculateOpponentLevel(opponent) {
-        const playerAvgLevel = this.getPlayerAverageLevel();
-        const variation = Math.floor(Math.random() * 6) - 3; // ±3 levels
-        return Math.max(1, playerAvgLevel + variation);
+        const { averageLevel, maxLevel, minLevel } = this.getPlayerLevelStats();
+        
+        // Create a balanced level range based on player characters
+        let targetLevel;
+        
+        if (averageLevel <= 3) {
+            // Early game: opponents should be close to average
+            targetLevel = averageLevel + Math.floor(Math.random() * 3) - 1; // -1 to +1
+        } else {
+            // Mid-late game: wider but controlled range
+            const levelSpread = Math.min(3, Math.floor((maxLevel - minLevel) / 2) + 1);
+            const minTarget = Math.max(1, averageLevel - levelSpread);
+            const maxTarget = averageLevel + levelSpread;
+            targetLevel = minTarget + Math.floor(Math.random() * (maxTarget - minTarget + 1));
+        }
+        
+        // Add stroke-based difficulty adjustment
+        const strokeModifier = this.calculateStrokeModifier(opponent.strokes);
+        
+        // Add slight difficulty modifier based on opponent complexity
+        const difficultyModifier = opponent.isPhrase ? 1 : 0;
+        const complexityModifier = opponent.difficulty >= 4 ? 1 : 0;
+        
+        return Math.max(1, targetLevel + strokeModifier + difficultyModifier + complexityModifier);
     }
     
-    // Get player's average character level
-    getPlayerAverageLevel() {
+    // Calculate level modifier based on stroke count
+    calculateStrokeModifier(strokeCount) {
+        // Create progressive difficulty tiers based on stroke count
+        if (strokeCount <= 3) return -2;      // Very simple characters (一, 二, 人) are easier
+        if (strokeCount <= 6) return -1;      // Simple characters (你, 好, 我) are a bit easier
+        if (strokeCount <= 10) return 0;      // Medium characters (是, 的) are balanced
+        if (strokeCount <= 15) return 1;      // Complex characters (麵, 湯) are harder
+        return 2;                             // Very complex characters (戴) are much harder
+    }
+    
+    // Get comprehensive player level statistics
+    getPlayerLevelStats() {
         const characters = Object.values(this.characters);
-        if (characters.length === 0) return 1;
+        if (characters.length === 0) return { averageLevel: 1, maxLevel: 1, minLevel: 1 };
         
-        const totalLevel = characters.reduce((sum, char) => sum + char.level, 0);
-        return Math.floor(totalLevel / characters.length);
+        const levels = characters.map(char => char.level);
+        const totalLevel = levels.reduce((sum, level) => sum + level, 0);
+        const averageLevel = Math.floor(totalLevel / levels.length);
+        const maxLevel = Math.max(...levels);
+        const minLevel = Math.min(...levels);
+        
+        return { averageLevel, maxLevel, minLevel };
+    }
+    
+    // Get player's average character level (kept for compatibility)
+    getPlayerAverageLevel() {
+        return this.getPlayerLevelStats().averageLevel;
     }
     
     // Execute battle turn (player attacks enemy)
@@ -800,15 +893,19 @@ class HanziGame {
             if (!this.phrases[opponent.name]) {
                 this.phrases[opponent.name] = new Phrase(opponent.name, opponent.originalData);
             }
-            // Unlock the phrase
+            // Unlock the phrase and reset to level 1
             this.phrases[opponent.name].unlocked = true;
+            this.phrases[opponent.name].level = 1;
+            this.phrases[opponent.name].xp = 0;
             this.player.totalPhrases++;
             
             return { type: 'phrase', name: opponent.name };
         } else {
             // Add character to collection if not already there
             if (!this.characters[opponent.name]) {
-                const result = this.addCharacter(opponent.name, opponent.originalData);
+                // Force level 1 for captured characters
+                const captureData = { ...opponent.originalData, level: 1, xp: 0 };
+                const result = this.addCharacter(opponent.name, captureData);
                 return { type: 'character', name: opponent.name, success: result.success };
             }
             return { type: 'character', name: opponent.name, success: false, message: 'Already owned' };
