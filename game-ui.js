@@ -1507,16 +1507,55 @@ class GameUI {
     
     // Handle file uploads
     async handleFileUploads(files) {
+        // Show warning and get confirmation before importing
+        const confirmed = this.confirmCustomDataImport();
+        if (!confirmed) {
+            return; // User cancelled
+        }
+        
         for (const file of files) {
             try {
                 const text = await this.readFileAsText(file);
-                const result = this.game.dataManager.importCombinedData(text);
-                this.showMessage(result.message, 'success');
-                this.updateDataStatus();
+                
+                // Use the new method that resets progress and imports custom data only
+                const result = this.game.importCustomDataWithReset(text);
+                
+                if (result.success) {
+                    this.showMessage(result.message, 'success');
+                    this.updateDataStatus();
+                    
+                    // Reset practice tracker to lock battles for new custom data
+                    this.practiceTracker.resetToDefaults();
+                    
+                    // Navigate back to character selection screen
+                    this.showScreen('character-select');
+                    
+                    // Refresh the UI to show the new data
+                    this.refreshCharacterGrid();
+                    this.updateHeaderStats(); // This already includes battle progress update
+                } else {
+                    this.showMessage(result.message, 'error');
+                }
             } catch (error) {
                 this.showMessage(`Failed to import ${file.name}: ${error.message}`, 'error');
             }
         }
+    }
+    
+    // Show confirmation dialog for custom data import
+    confirmCustomDataImport() {
+        return confirm(
+            '⚠️ WARNING: Importing custom data will OVERWRITE all current progress!\n\n' +
+            'This will:\n' +
+            '• Delete ALL character progress and levels\n' +
+            '• Delete ALL phrase unlocks and progress\n' +
+            '• Reset player level and XP to 0\n' +
+            '• Remove all battle records and items\n' +
+            '• Lock battles again (requires 10 practice sessions to unlock)\n' +
+            '• Switch to using ONLY your custom data\n\n' +
+            'If you want to keep your current progress, click Cancel and export your data first.\n\n' +
+            'Are you sure you want to continue?'
+        );
     }
     
     // Read file as text

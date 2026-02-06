@@ -185,6 +185,9 @@ class DataManager {
 
         // Store the data
         this.customCharacters = parsed;
+        
+        // Automatically switch to custom data source
+        this.dataSource = 'custom';
         this.saveCustomData();
 
         return {
@@ -217,6 +220,9 @@ class DataManager {
 
         // Store the data
         this.customPhrases = parsed;
+        
+        // Automatically switch to custom data source
+        this.dataSource = 'custom';
         this.saveCustomData();
 
         return {

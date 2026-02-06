@@ -1250,6 +1250,84 @@ class HanziGame {
             return { success: false, message: error.message };
         }
     }
+    
+    // Import custom data with complete reset (for fresh start with custom data only)
+    importCustomDataWithReset(jsonData) {
+        try {
+            // First, import the custom data
+            const result = this.dataManager.importCombinedData(jsonData);
+            
+            if (result.success) {
+                // Reset all game progress
+                this.resetToDefaultsForCustomData();
+                
+                // Switch to custom data source
+                this.dataManager.setDataSource('custom');
+                
+                // Initialize only with custom data
+                this.initializeWithCustomDataOnly();
+                
+                this.saveGame();
+                
+                return { 
+                    success: true, 
+                    message: 'Custom data imported successfully! Game reset to start fresh with your custom data.'
+                };
+            }
+            
+            return result;
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    }
+    
+    // Reset to defaults but don't add starter characters (for custom data import)
+    resetToDefaultsForCustomData() {
+        // Reset player
+        this.player = new Player();
+        
+        // Reset bag
+        this.bag = new Bag();
+        
+        // Clear all characters and phrases
+        this.characters = {};
+        this.phrases = {};
+        
+        // Reset current character and practice state
+        this.currentCharacter = null;
+        this.practiceStartTime = null;
+        this.strokes = [];
+        this.mistakes = [];
+        
+        // Reset phrase practice state
+        this.currentPhraseSequence = null;
+        
+        // Don't add any starter characters - we'll add only what's in custom data
+        
+        console.log('Game reset for custom data import');
+    }
+    
+    // Initialize game with custom data only
+    initializeWithCustomDataOnly() {
+        // Get custom character data
+        const activeCharacterData = this.dataManager.getActiveCharacterData();
+        
+        // Add all available characters from custom data at level 1
+        for (const [char, data] of Object.entries(activeCharacterData)) {
+            this.characters[char] = new Character(char, data);
+        }
+        
+        // Update player totals
+        this.player.totalCharacters = Object.keys(this.characters).length;
+        
+        // Give starter XP boost items
+        this.bag.addItem('xp_boost_small', 2);
+        
+        // Initialize phrases with custom data
+        this.initializePhrases();
+        
+        console.log('Game initialized with custom data only');
+    }
 
     // Switch between built-in and custom data
     switchDataSource(source) {
