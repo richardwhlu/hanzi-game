@@ -19,6 +19,12 @@ class HanziGame {
         // Phrase practice state
         this.currentPhrase = null;
         this.currentPhraseIndex = 0;
+        this.phraseSessionData = {
+            totalMistakes: 0,
+            totalTime: 0,
+            accuracySum: 0,
+            characterCount: 0
+        };
         
         // Data management
         this.dataManager = new DataManager();
@@ -309,6 +315,12 @@ class HanziGame {
         if (this.isPhrasePractice()) {
             const phraseProgress = this.getPhraseProgress();
             
+            // Accumulate session data for phrase performance calculation
+            this.phraseSessionData.totalMistakes += this.currentMistakes;
+            this.phraseSessionData.totalTime += completionTime;
+            this.phraseSessionData.accuracySum += accuracy;
+            this.phraseSessionData.characterCount++;
+            
             // Prepare completion data for phrase character
             const completionData = {
                 character: this.currentCharacter,
@@ -417,6 +429,15 @@ class HanziGame {
         this.currentPhrase = phrase;
         this.currentPhraseIndex = 0;
         
+        // Reset phrase session tracking
+        this.phraseSessionData = {
+            totalMistakes: 0,
+            totalTime: 0,
+            accuracySum: 0,
+            characterCount: 0,
+            startTime: Date.now()
+        };
+        
         // Start with the first character
         if (phrase.characters.length > 0) {
             const firstChar = phrase.characters[0];
@@ -461,12 +482,49 @@ class HanziGame {
         }
     }
     
+    // Calculate performance-based XP for phrase completion
+    calculatePhraseXP() {
+        if (!this.currentPhrase || this.phraseSessionData.characterCount === 0) {
+            // Fallback to old system if no session data
+            return this.currentPhrase ? this.currentPhrase.characters.length * 10 : 20;
+        }
+        
+        // Calculate average performance across all characters in the phrase
+        const averageAccuracy = this.phraseSessionData.accuracySum / this.phraseSessionData.characterCount;
+        const averageTime = this.phraseSessionData.totalTime / this.phraseSessionData.characterCount;
+        const totalMistakes = this.phraseSessionData.totalMistakes;
+        const phraseLength = this.currentPhrase.characters.length;
+        
+        // Use similar formula to character XP calculation, but scaled for phrases
+        const baseXP = 20 * phraseLength; // Base XP scales with phrase length
+        const accuracyBonus = Math.floor((averageAccuracy / 100) * 30 * phraseLength); // Accuracy bonus scales with length
+        const speedBonus = (averageTime < 30000) ? 10 * phraseLength : 0; // Speed bonus scales with length
+        const mistakePenalty = totalMistakes * 2; // Flat penalty per mistake
+        
+        // Calculate final XP with minimum of base XP / 4
+        const finalXP = Math.max(baseXP / 4, baseXP + accuracyBonus + speedBonus - mistakePenalty);
+        
+        console.log('Phrase XP calculation:', {
+            phraseLength,
+            averageAccuracy: Math.round(averageAccuracy),
+            averageTime: Math.round(averageTime),
+            totalMistakes,
+            baseXP,
+            accuracyBonus,
+            speedBonus,
+            mistakePenalty,
+            finalXP: Math.round(finalXP)
+        });
+        
+        return Math.round(finalXP);
+    }
+    
     // Complete phrase practice sequence
     completePhraseSequence() {
         if (!this.currentPhrase) return;
         
-        // Award bonus XP for completing full phrase
-        const bonusXP = this.currentPhrase.characters.length * 10;
+        // Calculate performance-based XP for completing full phrase
+        const bonusXP = this.calculatePhraseXP();
         const playerLeveledUp = this.player.addXP(bonusXP);
         
         // Record phrase completion and check if it's first time

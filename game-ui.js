@@ -827,38 +827,42 @@ class GameUI {
         // Show the modal
         this.elements.teamSelectionModal.classList.remove('hidden');
         
-        // Bind modal events
-        this.bindTeamSelectionEvents();
+        // Bind modal events only once - check if already bound
+        if (!this.teamSelectionEventsBound) {
+            this.bindTeamSelectionEvents();
+            this.teamSelectionEventsBound = true;
+        }
     }
     
-    // Populate available characters list
+    // Populate available characters list with cards
     populateAvailableCharactersList() {
         this.elements.availableCharactersList.innerHTML = '';
         
         this.teamSelectionState.availableCharacters.forEach((character, index) => {
-            const characterElement = document.createElement('div');
-            characterElement.className = 'team-selection-character';
-            characterElement.innerHTML = `
-                <div class="character-icon">${character.char}</div>
-                <div class="character-details">
-                    <div class="character-name">${character.pinyin}</div>
-                    <div class="character-stats">
-                        Level ${character.level} | HP: ${character.hp} | ATK: ${character.attack} | DEF: ${character.defense}
-                    </div>
-                    <div class="character-accuracy">Accuracy: ${character.getAccuracy()}%</div>
-                </div>
-                <button class="select-character-btn pixel-btn" data-index="${index}">Select</button>
-            `;
+            // Create character card using existing function
+            const card = this.createCharacterCard(character, false);
             
-            // Check if already selected
-            if (this.teamSelectionState.selectedCharacters.some(c => c.char === character.char)) {
-                characterElement.classList.add('selected');
-                const btn = characterElement.querySelector('.select-character-btn');
-                btn.textContent = 'Remove';
-                btn.classList.add('selected');
+            // Add team selection specific classes and functionality
+            card.classList.add('team-selection-card');
+            card.setAttribute('data-index', index);
+            
+            // Add selection state
+            const isSelected = this.teamSelectionState.selectedCharacters.some(c => c.char === character.char);
+            if (isSelected) {
+                card.classList.add('selected');
             }
             
-            this.elements.availableCharactersList.appendChild(characterElement);
+            // Add selection overlay with button
+            const selectionOverlay = document.createElement('div');
+            selectionOverlay.className = 'selection-overlay';
+            selectionOverlay.innerHTML = `
+                <button class="select-character-btn pixel-btn" data-index="${index}">
+                    ${isSelected ? 'Remove' : 'Select'}
+                </button>
+            `;
+            
+            card.appendChild(selectionOverlay);
+            this.elements.availableCharactersList.appendChild(card);
         });
     }
     
@@ -873,16 +877,12 @@ class GameUI {
         // Update start battle button state
         this.elements.startBattleBtn.disabled = count === 0;
         
-        // Update selected team list display
+        // Update selected team list display with mini cards
         this.elements.selectedTeamList.innerHTML = '';
         this.teamSelectionState.selectedCharacters.forEach(character => {
-            const teamMember = document.createElement('div');
-            teamMember.className = 'selected-team-member';
-            teamMember.innerHTML = `
-                <div class="team-member-icon">${character.char}</div>
-                <div class="team-member-name">${character.pinyin}</div>
-            `;
-            this.elements.selectedTeamList.appendChild(teamMember);
+            const miniCard = this.createCharacterCard(character, false);
+            miniCard.classList.add('selected-team-card');
+            this.elements.selectedTeamList.appendChild(miniCard);
         });
     }
     
