@@ -933,6 +933,11 @@ body {
     right: 8px;
 }
 
+/* Add padding to character info when there's a selection overlay */
+.character-card.team-selection-card .character-info {
+    padding-bottom: 40px; /* Make room for the selection button */
+}
+
 .select-character-btn {
     width: 100%;
     font-size: 12px !important;

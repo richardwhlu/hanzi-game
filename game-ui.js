@@ -901,6 +901,11 @@ class GameUI {
             this.confirmTeamSelection();
         });
         
+        // Cancel team selection button
+        this.elements.cancelTeamBtn.addEventListener('click', () => {
+            this.hideTeamSelectionModal();
+        });
+        
         // Close modal
         this.elements.teamModalClose.addEventListener('click', () => {
             this.hideTeamSelectionModal();
