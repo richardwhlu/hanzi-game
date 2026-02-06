@@ -1,0 +1,2025 @@
+{
+  "characters": {
+    "你": {
+      "pinyin": "nǐ",
+      "strokes": 7,
+      "difficulty": 1,
+      "frequency": 95
+    },
+    "好": {
+      "pinyin": "hǎo",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 98
+    },
+    "我": {
+      "pinyin": "wǒ",
+      "strokes": 7,
+      "difficulty": 1,
+      "frequency": 100
+    },
+    "是": {
+      "pinyin": "shì",
+      "strokes": 9,
+      "difficulty": 1,
+      "frequency": 99
+    },
+    "學": {
+      "pinyin": "xué",
+      "strokes": 16,
+      "difficulty": 3,
+      "frequency": 90
+    },
+    "生": {
+      "pinyin": "shēng",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 92
+    },
+    "老": {
+      "pinyin": "lǎo",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 88
+    },
+    "師": {
+      "pinyin": "shī",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 85
+    },
+    "嗎": {
+      "pinyin": "ma",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 94
+    },
+    "叫": {
+      "pinyin": "jiào",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 87
+    },
+    "什": {
+      "pinyin": "shén",
+      "strokes": 4,
+      "difficulty": 2,
+      "frequency": 80
+    },
+    "麼": {
+      "pinyin": "me",
+      "strokes": 14,
+      "difficulty": 2,
+      "frequency": 82
+    },
+    "名": {
+      "pinyin": "míng",
+      "strokes": 6,
+      "difficulty": 2,
+      "frequency": 84
+    },
+    "字": {
+      "pinyin": "zì",
+      "strokes": 6,
+      "difficulty": 2,
+      "frequency": 86
+    },
+    "他": {
+      "pinyin": "tā",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 97
+    },
+    "她": {
+      "pinyin": "tā",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 93
+    },
+    "們": {
+      "pinyin": "men",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 91
+    },
+    "的": {
+      "pinyin": "de",
+      "strokes": 8,
+      "difficulty": 1,
+      "frequency": 100
+    },
+    "朋": {
+      "pinyin": "péng",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 75
+    },
+    "友": {
+      "pinyin": "yǒu",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 78
+    },
+    "家": {
+      "pinyin": "jiā",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 89
+    },
+    "爸": {
+      "pinyin": "bà",
+      "strokes": 8,
+      "difficulty": 1,
+      "frequency": 72
+    },
+    "媽": {
+      "pinyin": "mā",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 74
+    },
+    "哥": {
+      "pinyin": "gē",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 68
+    },
+    "弟": {
+      "pinyin": "dì",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 65
+    },
+    "姐": {
+      "pinyin": "jiě",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 67
+    },
+    "妹": {
+      "pinyin": "mèi",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 66
+    },
+    "有": {
+      "pinyin": "yǒu",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 96
+    },
+    "幾": {
+      "pinyin": "jǐ",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 81
+    },
+    "個": {
+      "pinyin": "gè",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 95
+    },
+    "人": {
+      "pinyin": "rén",
+      "strokes": 2,
+      "difficulty": 1,
+      "frequency": 99
+    },
+    "中": {
+      "pinyin": "zhōng",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 93
+    },
+    "國": {
+      "pinyin": "guó",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 94
+    },
+    "美": {
+      "pinyin": "měi",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 86
+    },
+    "很": {
+      "pinyin": "hěn",
+      "strokes": 9,
+      "difficulty": 1,
+      "frequency": 90
+    },
+    "喜": {
+      "pinyin": "xǐ",
+      "strokes": 12,
+      "difficulty": 3,
+      "frequency": 78
+    },
+    "歡": {
+      "pinyin": "huān",
+      "strokes": 17,
+      "difficulty": 3,
+      "frequency": 79
+    },
+    "吃": {
+      "pinyin": "chī",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 84
+    },
+    "飯": {
+      "pinyin": "fàn",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 82
+    },
+    "喝": {
+      "pinyin": "hē",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 80
+    },
+    "水": {
+      "pinyin": "shuǐ",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 85
+    },
+    "茶": {
+      "pinyin": "chá",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 76
+    },
+    "謝": {
+      "pinyin": "xiè",
+      "strokes": 17,
+      "difficulty": 3,
+      "frequency": 77
+    },
+    "不": {
+      "pinyin": "bù",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 98
+    },
+    "客": {
+      "pinyin": "kè",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 73
+    },
+    "氣": {
+      "pinyin": "qì",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 74
+    },
+    "再": {
+      "pinyin": "zài",
+      "strokes": 6,
+      "difficulty": 2,
+      "frequency": 83
+    },
+    "見": {
+      "pinyin": "jiàn",
+      "strokes": 7,
+      "difficulty": 1,
+      "frequency": 87
+    },
+    "明": {
+      "pinyin": "míng",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 81
+    },
+    "天": {
+      "pinyin": "tiān",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 88
+    },
+    "今": {
+      "pinyin": "jīn",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 82
+    },
+    "昨": {
+      "pinyin": "zuó",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 75
+    },
+    "年": {
+      "pinyin": "nián",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 89
+    },
+    "月": {
+      "pinyin": "yuè",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 86
+    },
+    "日": {
+      "pinyin": "rì",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 87
+    },
+    "號": {
+      "pinyin": "hào",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 79
+    },
+    "星": {
+      "pinyin": "xīng",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 77
+    },
+    "期": {
+      "pinyin": "qī",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 78
+    },
+    "一": {
+      "pinyin": "yī",
+      "strokes": 1,
+      "difficulty": 1,
+      "frequency": 100
+    },
+    "二": {
+      "pinyin": "èr",
+      "strokes": 2,
+      "difficulty": 1,
+      "frequency": 98
+    },
+    "三": {
+      "pinyin": "sān",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 97
+    },
+    "四": {
+      "pinyin": "sì",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 96
+    },
+    "五": {
+      "pinyin": "wǔ",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 95
+    },
+    "六": {
+      "pinyin": "liù",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 94
+    },
+    "七": {
+      "pinyin": "qī",
+      "strokes": 2,
+      "difficulty": 1,
+      "frequency": 93
+    },
+    "八": {
+      "pinyin": "bā",
+      "strokes": 2,
+      "difficulty": 1,
+      "frequency": 92
+    },
+    "九": {
+      "pinyin": "jiǔ",
+      "strokes": 2,
+      "difficulty": 1,
+      "frequency": 91
+    },
+    "十": {
+      "pinyin": "shí",
+      "strokes": 2,
+      "difficulty": 1,
+      "frequency": 99
+    },
+    "百": {
+      "pinyin": "bǎi",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 85
+    },
+    "千": {
+      "pinyin": "qiān",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 80
+    },
+    "萬": {
+      "pinyin": "wàn",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 83
+    },
+    "多": {
+      "pinyin": "duō",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 88
+    },
+    "少": {
+      "pinyin": "shǎo",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 84
+    },
+    "錢": {
+      "pinyin": "qián",
+      "strokes": 16,
+      "difficulty": 3,
+      "frequency": 81
+    },
+    "塊": {
+      "pinyin": "kuài",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 76
+    },
+    "毛": {
+      "pinyin": "máo",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 72
+    },
+    "買": {
+      "pinyin": "mǎi",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 79
+    },
+    "賣": {
+      "pinyin": "mài",
+      "strokes": 15,
+      "difficulty": 3,
+      "frequency": 75
+    },
+    "書": {
+      "pinyin": "shū",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 86
+    },
+    "校": {
+      "pinyin": "xiào",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 88
+    },
+    "對": {
+      "pinyin": "duì",
+      "strokes": 14,
+      "difficulty": 2,
+      "frequency": 90
+    },
+    "起": {
+      "pinyin": "qǐ",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 83
+    },
+    "沒": {
+      "pinyin": "méi",
+      "strokes": 7,
+      "difficulty": 1,
+      "frequency": 89
+    },
+    "關": {
+      "pinyin": "guān",
+      "strokes": 19,
+      "difficulty": 3,
+      "frequency": 82
+    },
+    "係": {
+      "pinyin": "xì",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 81
+    },
+    "請": {
+      "pinyin": "qǐng",
+      "strokes": 15,
+      "difficulty": 3,
+      "frequency": 84
+    },
+    "問": {
+      "pinyin": "wèn",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 85
+    },
+    "都": {
+      "pinyin": "dōu",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 87
+    },
+    "會": {
+      "pinyin": "huì",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 91
+    },
+    "說": {
+      "pinyin": "shuō",
+      "strokes": 14,
+      "difficulty": 2,
+      "frequency": 92
+    },
+    "話": {
+      "pinyin": "huà",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 88
+    },
+    "語": {
+      "pinyin": "yǔ",
+      "strokes": 14,
+      "difficulty": 2,
+      "frequency": 86
+    },
+    "文": {
+      "pinyin": "wén",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 87
+    },
+    "英": {
+      "pinyin": "yīng",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 82
+    },
+    "住": {
+      "pinyin": "zhù",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 80
+    },
+    "在": {
+      "pinyin": "zài",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 96
+    },
+    "哪": {
+      "pinyin": "nǎ",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 83
+    },
+    "兒": {
+      "pinyin": "ér",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 85
+    },
+    "裡": {
+      "pinyin": "lǐ",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 89
+    },
+    "這": {
+      "pinyin": "zhè",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 94
+    },
+    "那": {
+      "pinyin": "nà",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 92
+    },
+    "來": {
+      "pinyin": "lái",
+      "strokes": 8,
+      "difficulty": 1,
+      "frequency": 93
+    },
+    "去": {
+      "pinyin": "qù",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 91
+    },
+    "從": {
+      "pinyin": "cóng",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 84
+    },
+    "到": {
+      "pinyin": "dào",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 88
+    },
+    "想": {
+      "pinyin": "xiǎng",
+      "strokes": 13,
+      "difficulty": 3,
+      "frequency": 87
+    },
+    "要": {
+      "pinyin": "yào",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 90
+    },
+    "能": {
+      "pinyin": "néng",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 86
+    },
+    "可": {
+      "pinyin": "kě",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 87
+    },
+    "以": {
+      "pinyin": "yǐ",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 88
+    },
+    "太": {
+      "pinyin": "tài",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 82
+    },
+    "了": {
+      "pinyin": "le",
+      "strokes": 2,
+      "difficulty": 1,
+      "frequency": 97
+    },
+    "上": {
+      "pinyin": "shàng",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 92
+    },
+    "下": {
+      "pinyin": "xià",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 91
+    },
+    "午": {
+      "pinyin": "wǔ",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 83
+    },
+    "課": {
+      "pinyin": "kè",
+      "strokes": 15,
+      "difficulty": 3,
+      "frequency": 84
+    },
+    "點": {
+      "pinyin": "diǎn",
+      "strokes": 17,
+      "difficulty": 3,
+      "frequency": 85
+    },
+    "鐘": {
+      "pinyin": "zhōng",
+      "strokes": 20,
+      "difficulty": 4,
+      "frequency": 79
+    },
+    "分": {
+      "pinyin": "fēn",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 83
+    },
+    "刻": {
+      "pinyin": "kè",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 76
+    },
+    "半": {
+      "pinyin": "bàn",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 80
+    },
+    "現": {
+      "pinyin": "xiàn",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 84
+    },
+    "睡": {
+      "pinyin": "shuì",
+      "strokes": 13,
+      "difficulty": 3,
+      "frequency": 78
+    },
+    "覺": {
+      "pinyin": "jiào",
+      "strokes": 20,
+      "difficulty": 4,
+      "frequency": 79
+    },
+    "做": {
+      "pinyin": "zuò",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 86
+    },
+    "看": {
+      "pinyin": "kàn",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 88
+    },
+    "電": {
+      "pinyin": "diàn",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 82
+    },
+    "視": {
+      "pinyin": "shì",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 81
+    },
+    "影": {
+      "pinyin": "yǐng",
+      "strokes": 15,
+      "difficulty": 4,
+      "frequency": 77
+    },
+    "聽": {
+      "pinyin": "tīng",
+      "strokes": 22,
+      "difficulty": 4,
+      "frequency": 83
+    },
+    "音": {
+      "pinyin": "yīn",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 80
+    },
+    "樂": {
+      "pinyin": "yuè",
+      "strokes": 15,
+      "difficulty": 3,
+      "frequency": 81
+    },
+    "打": {
+      "pinyin": "dǎ",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 84
+    },
+    "球": {
+      "pinyin": "qiú",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 79
+    },
+    "籃": {
+      "pinyin": "lán",
+      "strokes": 20,
+      "difficulty": 4,
+      "frequency": 72
+    },
+    "足": {
+      "pinyin": "zú",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 74
+    },
+    "游": {
+      "pinyin": "yóu",
+      "strokes": 12,
+      "difficulty": 3,
+      "frequency": 76
+    },
+    "泳": {
+      "pinyin": "yǒng",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 73
+    },
+    "走": {
+      "pinyin": "zǒu",
+      "strokes": 7,
+      "difficulty": 1,
+      "frequency": 82
+    },
+    "跑": {
+      "pinyin": "pǎo",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 77
+    },
+    "步": {
+      "pinyin": "bù",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 78
+    },
+    "坐": {
+      "pinyin": "zuò",
+      "strokes": 7,
+      "difficulty": 1,
+      "frequency": 83
+    },
+    "站": {
+      "pinyin": "zhàn",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 79
+    },
+    "躺": {
+      "pinyin": "tǎng",
+      "strokes": 15,
+      "difficulty": 4,
+      "frequency": 71
+    },
+    "大": {
+      "pinyin": "dà",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 94
+    },
+    "小": {
+      "pinyin": "xiǎo",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 93
+    },
+    "高": {
+      "pinyin": "gāo",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 85
+    },
+    "矮": {
+      "pinyin": "ǎi",
+      "strokes": 13,
+      "difficulty": 3,
+      "frequency": 69
+    },
+    "長": {
+      "pinyin": "cháng",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 86
+    },
+    "短": {
+      "pinyin": "duǎn",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 75
+    },
+    "胖": {
+      "pinyin": "pàng",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 73
+    },
+    "瘦": {
+      "pinyin": "shòu",
+      "strokes": 14,
+      "difficulty": 3,
+      "frequency": 72
+    },
+    "新": {
+      "pinyin": "xīn",
+      "strokes": 13,
+      "difficulty": 2,
+      "frequency": 84
+    },
+    "舊": {
+      "pinyin": "jiù",
+      "strokes": 15,
+      "difficulty": 3,
+      "frequency": 78
+    },
+    "快": {
+      "pinyin": "kuài",
+      "strokes": 7,
+      "difficulty": 1,
+      "frequency": 83
+    },
+    "慢": {
+      "pinyin": "màn",
+      "strokes": 14,
+      "difficulty": 3,
+      "frequency": 76
+    },
+    "忙": {
+      "pinyin": "máng",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 79
+    },
+    "累": {
+      "pinyin": "lèi",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 77
+    },
+    "冷": {
+      "pinyin": "lěng",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 76
+    },
+    "熱": {
+      "pinyin": "rè",
+      "strokes": 15,
+      "difficulty": 3,
+      "frequency": 78
+    },
+    "暖": {
+      "pinyin": "nuǎn",
+      "strokes": 13,
+      "difficulty": 3,
+      "frequency": 74
+    },
+    "涼": {
+      "pinyin": "liáng",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 73
+    },
+    "顏": {
+      "pinyin": "yán",
+      "strokes": 18,
+      "difficulty": 4,
+      "frequency": 71
+    },
+    "色": {
+      "pinyin": "sè",
+      "strokes": 6,
+      "difficulty": 2,
+      "frequency": 79
+    },
+    "紅": {
+      "pinyin": "hóng",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 80
+    },
+    "黃": {
+      "pinyin": "huáng",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 76
+    },
+    "藍": {
+      "pinyin": "lán",
+      "strokes": 17,
+      "difficulty": 3,
+      "frequency": 74
+    },
+    "綠": {
+      "pinyin": "lǜ",
+      "strokes": 14,
+      "difficulty": 3,
+      "frequency": 75
+    },
+    "白": {
+      "pinyin": "bái",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 81
+    },
+    "黑": {
+      "pinyin": "hēi",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 77
+    },
+    "校": {
+      "pinyin": "xiào",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 88
+    },
+    "習": {
+      "pinyin": "xí",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 85
+    },
+    "衣": {
+      "pinyin": "yī",
+      "strokes": 6,
+      "difficulty": 1,
+      "frequency": 80
+    },
+    "服": {
+      "pinyin": "fú",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 78
+    },
+    "穿": {
+      "pinyin": "chuān",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 77
+    },
+    "戴": {
+      "pinyin": "dài",
+      "strokes": 17,
+      "difficulty": 4,
+      "frequency": 72
+    },
+    "帽": {
+      "pinyin": "mào",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 71
+    },
+    "子": {
+      "pinyin": "zi",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 92
+    },
+    "鞋": {
+      "pinyin": "xié",
+      "strokes": 15,
+      "difficulty": 4,
+      "frequency": 73
+    },
+    "開": {
+      "pinyin": "kāi",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 86
+    },
+    "始": {
+      "pinyin": "shǐ",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 82
+    },
+    "結": {
+      "pinyin": "jié",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 81
+    },
+    "束": {
+      "pinyin": "shù",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 75
+    },
+    "知": {
+      "pinyin": "zhī",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 84
+    },
+    "道": {
+      "pinyin": "dào",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 85
+    },
+    "認": {
+      "pinyin": "rèn",
+      "strokes": 14,
+      "difficulty": 2,
+      "frequency": 81
+    },
+    "識": {
+      "pinyin": "shí",
+      "strokes": 19,
+      "difficulty": 3,
+      "frequency": 80
+    },
+    "懂": {
+      "pinyin": "dǒng",
+      "strokes": 15,
+      "difficulty": 4,
+      "frequency": 77
+    },
+    "幫": {
+      "pinyin": "bāng",
+      "strokes": 17,
+      "difficulty": 3,
+      "frequency": 79
+    },
+    "助": {
+      "pinyin": "zhù",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 78
+    },
+    "教": {
+      "pinyin": "jiāo",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 83
+    },
+    "給": {
+      "pinyin": "gěi",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 87
+    },
+    "送": {
+      "pinyin": "sòng",
+      "strokes": 9,
+      "difficulty": 2,
+      "frequency": 80
+    },
+    "還": {
+      "pinyin": "huán",
+      "strokes": 16,
+      "difficulty": 3,
+      "frequency": 85
+    },
+    "借": {
+      "pinyin": "jiè",
+      "strokes": 10,
+      "difficulty": 2,
+      "frequency": 78
+    },
+    "找": {
+      "pinyin": "zhǎo",
+      "strokes": 7,
+      "difficulty": 1,
+      "frequency": 82
+    },
+    "等": {
+      "pinyin": "děng",
+      "strokes": 12,
+      "difficulty": 2,
+      "frequency": 81
+    },
+    "用": {
+      "pinyin": "yòng",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 88
+    },
+    "習": {
+      "pinyin": "xí",
+      "strokes": 11,
+      "difficulty": 2,
+      "frequency": 85
+    }
+  },
+  "phrases": {
+    "你好": {
+      "characters": [
+        "你",
+        "好"
+      ],
+      "requirements": {
+        "你": 2,
+        "好": 2
+      },
+      "difficulty": 1,
+      "frequency": 98,
+      "pinyin": "nǐ hǎo",
+      "meaning": "hello"
+    },
+    "學生": {
+      "characters": [
+        "學",
+        "生"
+      ],
+      "requirements": {
+        "學": 2,
+        "生": 2
+      },
+      "difficulty": 2,
+      "frequency": 92,
+      "pinyin": "xué shēng",
+      "meaning": "student"
+    },
+    "老師": {
+      "characters": [
+        "老",
+        "師"
+      ],
+      "requirements": {
+        "老": 2,
+        "師": 2
+      },
+      "difficulty": 2,
+      "frequency": 88,
+      "pinyin": "lǎo shī",
+      "meaning": "teacher"
+    },
+    "什麼": {
+      "characters": [
+        "什",
+        "麼"
+      ],
+      "requirements": {
+        "什": 2,
+        "麼": 2
+      },
+      "difficulty": 2,
+      "frequency": 85,
+      "pinyin": "shén me",
+      "meaning": "what"
+    },
+    "名字": {
+      "characters": [
+        "名",
+        "字"
+      ],
+      "requirements": {
+        "名": 2,
+        "字": 2
+      },
+      "difficulty": 2,
+      "frequency": 87,
+      "pinyin": "míng zi",
+      "meaning": "name"
+    },
+    "朋友": {
+      "characters": [
+        "朋",
+        "友"
+      ],
+      "requirements": {
+        "朋": 2,
+        "友": 2
+      },
+      "difficulty": 2,
+      "frequency": 80,
+      "pinyin": "péng you",
+      "meaning": "friend"
+    },
+    "爸爸": {
+      "characters": [
+        "爸",
+        "爸"
+      ],
+      "requirements": {
+        "爸": 3
+      },
+      "difficulty": 1,
+      "frequency": 76,
+      "pinyin": "bà ba",
+      "meaning": "father/dad"
+    },
+    "媽媽": {
+      "characters": [
+        "媽",
+        "媽"
+      ],
+      "requirements": {
+        "媽": 3
+      },
+      "difficulty": 1,
+      "frequency": 78,
+      "pinyin": "mā ma",
+      "meaning": "mother/mom"
+    },
+    "哥哥": {
+      "characters": [
+        "哥",
+        "哥"
+      ],
+      "requirements": {
+        "哥": 3
+      },
+      "difficulty": 2,
+      "frequency": 72,
+      "pinyin": "gē ge",
+      "meaning": "older brother"
+    },
+    "弟弟": {
+      "characters": [
+        "弟",
+        "弟"
+      ],
+      "requirements": {
+        "弟": 3
+      },
+      "difficulty": 2,
+      "frequency": 69,
+      "pinyin": "dì di",
+      "meaning": "younger brother"
+    },
+    "姐姐": {
+      "characters": [
+        "姐",
+        "姐"
+      ],
+      "requirements": {
+        "姐": 3
+      },
+      "difficulty": 2,
+      "frequency": 71,
+      "pinyin": "jiě jie",
+      "meaning": "older sister"
+    },
+    "妹妹": {
+      "characters": [
+        "妹",
+        "妹"
+      ],
+      "requirements": {
+        "妹": 3
+      },
+      "difficulty": 2,
+      "frequency": 70,
+      "pinyin": "mèi mei",
+      "meaning": "younger sister"
+    },
+    "中國": {
+      "characters": [
+        "中",
+        "國"
+      ],
+      "requirements": {
+        "中": 2,
+        "國": 2
+      },
+      "difficulty": 2,
+      "frequency": 95,
+      "pinyin": "Zhōng guó",
+      "meaning": "China"
+    },
+    "美國": {
+      "characters": [
+        "美",
+        "國"
+      ],
+      "requirements": {
+        "美": 2,
+        "國": 2
+      },
+      "difficulty": 2,
+      "frequency": 91,
+      "pinyin": "Měi guó",
+      "meaning": "America/USA"
+    },
+    "喜歡": {
+      "characters": [
+        "喜",
+        "歡"
+      ],
+      "requirements": {
+        "喜": 2,
+        "歡": 2
+      },
+      "difficulty": 3,
+      "frequency": 82,
+      "pinyin": "xǐ huan",
+      "meaning": "to like"
+    },
+    "吃飯": {
+      "characters": [
+        "吃",
+        "飯"
+      ],
+      "requirements": {
+        "吃": 2,
+        "飯": 2
+      },
+      "difficulty": 2,
+      "frequency": 85,
+      "pinyin": "chī fàn",
+      "meaning": "to eat (meal)"
+    },
+    "喝水": {
+      "characters": [
+        "喝",
+        "水"
+      ],
+      "requirements": {
+        "喝": 2,
+        "水": 2
+      },
+      "difficulty": 2,
+      "frequency": 83,
+      "pinyin": "hē shuǐ",
+      "meaning": "to drink water"
+    },
+    "謝謝": {
+      "characters": [
+        "謝",
+        "謝"
+      ],
+      "requirements": {
+        "謝": 3
+      },
+      "difficulty": 2,
+      "frequency": 81,
+      "pinyin": "xiè xie",
+      "meaning": "thank you"
+    },
+    "不客氣": {
+      "characters": [
+        "不",
+        "客",
+        "氣"
+      ],
+      "requirements": {
+        "不": 2,
+        "客": 3,
+        "氣": 2
+      },
+      "difficulty": 2,
+      "frequency": 77,
+      "pinyin": "bú kè qi",
+      "meaning": "you're welcome"
+    },
+    "再見": {
+      "characters": [
+        "再",
+        "見"
+      ],
+      "requirements": {
+        "再": 2,
+        "見": 2
+      },
+      "difficulty": 2,
+      "frequency": 86,
+      "pinyin": "zài jiàn",
+      "meaning": "goodbye"
+    },
+    "明天": {
+      "characters": [
+        "明",
+        "天"
+      ],
+      "requirements": {
+        "明": 2,
+        "天": 2
+      },
+      "difficulty": 2,
+      "frequency": 86,
+      "pinyin": "míng tiān",
+      "meaning": "tomorrow"
+    },
+    "今天": {
+      "characters": [
+        "今",
+        "天"
+      ],
+      "requirements": {
+        "今": 2,
+        "天": 2
+      },
+      "difficulty": 1,
+      "frequency": 87,
+      "pinyin": "jīn tiān",
+      "meaning": "today"
+    },
+    "昨天": {
+      "characters": [
+        "昨",
+        "天"
+      ],
+      "requirements": {
+        "昨": 2,
+        "天": 2
+      },
+      "difficulty": 2,
+      "frequency": 83,
+      "pinyin": "zuó tiān",
+      "meaning": "yesterday"
+    },
+    "星期": {
+      "characters": [
+        "星",
+        "期"
+      ],
+      "requirements": {
+        "星": 2,
+        "期": 2
+      },
+      "difficulty": 2,
+      "frequency": 79,
+      "pinyin": "xīng qī",
+      "meaning": "week"
+    },
+    "多少": {
+      "characters": [
+        "多",
+        "少"
+      ],
+      "requirements": {
+        "多": 2,
+        "少": 2
+      },
+      "difficulty": 1,
+      "frequency": 88,
+      "pinyin": "duō shao",
+      "meaning": "how many/how much"
+    },
+    "學校": {
+      "characters": [
+        "學",
+        "校"
+      ],
+      "requirements": {
+        "學": 2,
+        "校": 2
+      },
+      "difficulty": 2,
+      "frequency": 90,
+      "pinyin": "xué xiào",
+      "meaning": "school"
+    },
+    "對不起": {
+      "characters": [
+        "對",
+        "不",
+        "起"
+      ],
+      "requirements": {
+        "對": 2,
+        "不": 2,
+        "起": 2
+      },
+      "difficulty": 2,
+      "frequency": 84,
+      "pinyin": "duì bu qǐ",
+      "meaning": "sorry/excuse me"
+    },
+    "沒關係": {
+      "characters": [
+        "沒",
+        "關",
+        "係"
+      ],
+      "requirements": {
+        "沒": 2,
+        "關": 2,
+        "係": 2
+      },
+      "difficulty": 2,
+      "frequency": 82,
+      "pinyin": "méi guān xi",
+      "meaning": "it's okay/no problem"
+    },
+    "說話": {
+      "characters": [
+        "說",
+        "話"
+      ],
+      "requirements": {
+        "說": 2,
+        "話": 2
+      },
+      "difficulty": 2,
+      "frequency": 91,
+      "pinyin": "shuō huà",
+      "meaning": "to speak/talk"
+    },
+    "中文": {
+      "characters": [
+        "中",
+        "文"
+      ],
+      "requirements": {
+        "中": 2,
+        "文": 2
+      },
+      "difficulty": 2,
+      "frequency": 89,
+      "pinyin": "Zhōng wén",
+      "meaning": "Chinese (language)"
+    },
+    "英文": {
+      "characters": [
+        "英",
+        "文"
+      ],
+      "requirements": {
+        "英": 2,
+        "文": 2
+      },
+      "difficulty": 2,
+      "frequency": 85,
+      "pinyin": "Yīng wén",
+      "meaning": "English (language)"
+    },
+    "哪兒": {
+      "characters": [
+        "哪",
+        "兒"
+      ],
+      "requirements": {
+        "哪": 2,
+        "兒": 2
+      },
+      "difficulty": 2,
+      "frequency": 85,
+      "pinyin": "nǎr",
+      "meaning": "where"
+    },
+    "這兒": {
+      "characters": [
+        "這",
+        "兒"
+      ],
+      "requirements": {
+        "這": 2,
+        "兒": 2
+      },
+      "difficulty": 1,
+      "frequency": 88,
+      "pinyin": "zhèr",
+      "meaning": "here"
+    },
+    "那兒": {
+      "characters": [
+        "那",
+        "兒"
+      ],
+      "requirements": {
+        "那": 2,
+        "兒": 2
+      },
+      "difficulty": 1,
+      "frequency": 86,
+      "pinyin": "nàr",
+      "meaning": "there"
+    },
+    "可以": {
+      "characters": [
+        "可",
+        "以"
+      ],
+      "requirements": {
+        "可": 2,
+        "以": 2
+      },
+      "difficulty": 1,
+      "frequency": 89,
+      "pinyin": "kě yǐ",
+      "meaning": "can/may"
+    },
+    "上課": {
+      "characters": [
+        "上",
+        "課"
+      ],
+      "requirements": {
+        "上": 2,
+        "課": 2
+      },
+      "difficulty": 2,
+      "frequency": 86,
+      "pinyin": "shàng kè",
+      "meaning": "to attend class"
+    },
+    "下課": {
+      "characters": [
+        "下",
+        "課"
+      ],
+      "requirements": {
+        "下": 2,
+        "課": 2
+      },
+      "difficulty": 2,
+      "frequency": 83,
+      "pinyin": "xià kè",
+      "meaning": "class is over"
+    },
+    "上午": {
+      "characters": [
+        "上",
+        "午"
+      ],
+      "requirements": {
+        "上": 2,
+        "午": 2
+      },
+      "difficulty": 1,
+      "frequency": 85,
+      "pinyin": "shàng wǔ",
+      "meaning": "morning/a.m."
+    },
+    "下午": {
+      "characters": [
+        "下",
+        "午"
+      ],
+      "requirements": {
+        "下": 2,
+        "午": 2
+      },
+      "difficulty": 1,
+      "frequency": 86,
+      "pinyin": "xià wǔ",
+      "meaning": "afternoon/p.m."
+    },
+    "現在": {
+      "characters": [
+        "現",
+        "在"
+      ],
+      "requirements": {
+        "現": 2,
+        "在": 2
+      },
+      "difficulty": 2,
+      "frequency": 91,
+      "pinyin": "xiàn zài",
+      "meaning": "now"
+    },
+    "睡覺": {
+      "characters": [
+        "睡",
+        "覺"
+      ],
+      "requirements": {
+        "睡": 3,
+        "覺": 2
+      },
+      "difficulty": 3,
+      "frequency": 80,
+      "pinyin": "shuì jiào",
+      "meaning": "to sleep"
+    },
+    "看書": {
+      "characters": [
+        "看",
+        "書"
+      ],
+      "requirements": {
+        "看": 2,
+        "書": 2
+      },
+      "difficulty": 2,
+      "frequency": 88,
+      "pinyin": "kàn shū",
+      "meaning": "to read"
+    },
+    "電視": {
+      "characters": [
+        "電",
+        "視"
+      ],
+      "requirements": {
+        "電": 2,
+        "視": 2
+      },
+      "difficulty": 2,
+      "frequency": 84,
+      "pinyin": "diàn shì",
+      "meaning": "television"
+    },
+    "電影": {
+      "characters": [
+        "電",
+        "影"
+      ],
+      "requirements": {
+        "電": 2,
+        "影": 3
+      },
+      "difficulty": 3,
+      "frequency": 81,
+      "pinyin": "diàn yǐng",
+      "meaning": "movie"
+    },
+    "音樂": {
+      "characters": [
+        "音",
+        "樂"
+      ],
+      "requirements": {
+        "音": 2,
+        "樂": 2
+      },
+      "difficulty": 2,
+      "frequency": 82,
+      "pinyin": "yīn yuè",
+      "meaning": "music"
+    },
+    "打球": {
+      "characters": [
+        "打",
+        "球"
+      ],
+      "requirements": {
+        "打": 2,
+        "球": 2
+      },
+      "difficulty": 2,
+      "frequency": 83,
+      "pinyin": "dǎ qiú",
+      "meaning": "to play ball"
+    },
+    "籃球": {
+      "characters": [
+        "籃",
+        "球"
+      ],
+      "requirements": {
+        "籃": 4,
+        "球": 2
+      },
+      "difficulty": 3,
+      "frequency": 77,
+      "pinyin": "lán qiú",
+      "meaning": "basketball"
+    },
+    "足球": {
+      "characters": [
+        "足",
+        "球"
+      ],
+      "requirements": {
+        "足": 2,
+        "球": 2
+      },
+      "difficulty": 2,
+      "frequency": 79,
+      "pinyin": "zú qiú",
+      "meaning": "soccer/football"
+    },
+    "游泳": {
+      "characters": [
+        "游",
+        "泳"
+      ],
+      "requirements": {
+        "游": 3,
+        "泳": 2
+      },
+      "difficulty": 3,
+      "frequency": 76,
+      "pinyin": "yóu yǒng",
+      "meaning": "to swim"
+    },
+    "跑步": {
+      "characters": [
+        "跑",
+        "步"
+      ],
+      "requirements": {
+        "跑": 2,
+        "步": 2
+      },
+      "difficulty": 2,
+      "frequency": 79,
+      "pinyin": "pǎo bù",
+      "meaning": "to run/jog"
+    },
+    "帽子": {
+      "characters": [
+        "帽",
+        "子"
+      ],
+      "requirements": {
+        "帽": 3,
+        "子": 2
+      },
+      "difficulty": 2,
+      "frequency": 75,
+      "pinyin": "mào zi",
+      "meaning": "hat/cap"
+    },
+    "開始": {
+      "characters": [
+        "開",
+        "始"
+      ],
+      "requirements": {
+        "開": 2,
+        "始": 2
+      },
+      "difficulty": 2,
+      "frequency": 85,
+      "pinyin": "kāi shǐ",
+      "meaning": "to begin/start"
+    },
+    "結束": {
+      "characters": [
+        "結",
+        "束"
+      ],
+      "requirements": {
+        "結": 2,
+        "束": 3
+      },
+      "difficulty": 2,
+      "frequency": 80,
+      "pinyin": "jié shù",
+      "meaning": "to end/finish"
+    },
+    "知道": {
+      "characters": [
+        "知",
+        "道"
+      ],
+      "requirements": {
+        "知": 2,
+        "道": 2
+      },
+      "difficulty": 2,
+      "frequency": 86,
+      "pinyin": "zhī dào",
+      "meaning": "to know"
+    },
+    "認識": {
+      "characters": [
+        "認",
+        "識"
+      ],
+      "requirements": {
+        "認": 2,
+        "識": 2
+      },
+      "difficulty": 2,
+      "frequency": 82,
+      "pinyin": "rèn shi",
+      "meaning": "to know/recognize (person)"
+    },
+    "幫助": {
+      "characters": [
+        "幫",
+        "助"
+      ],
+      "requirements": {
+        "幫": 2,
+        "助": 2
+      },
+      "difficulty": 2,
+      "frequency": 80,
+      "pinyin": "bāng zhù",
+      "meaning": "to help"
+    },
+    "衣服": {
+      "characters": [
+        "衣",
+        "服"
+      ],
+      "requirements": {
+        "衣": 2,
+        "服": 2
+      },
+      "difficulty": 2,
+      "frequency": 81,
+      "pinyin": "yī fu",
+      "meaning": "clothes"
+    },
+    "顏色": {
+      "characters": [
+        "顏",
+        "色"
+      ],
+      "requirements": {
+        "顏": 4,
+        "色": 2
+      },
+      "difficulty": 3,
+      "frequency": 77,
+      "pinyin": "yán sè",
+      "meaning": "color"
+    },
+    "學習": {
+      "characters": [
+        "學",
+        "習"
+      ],
+      "requirements": {
+        "學": 2,
+        "習": 2
+      },
+      "difficulty": 2,
+      "frequency": 88,
+      "pinyin": "xué xí",
+      "meaning": "to study/learn"
+    }
+  }
+}
