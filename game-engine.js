@@ -261,9 +261,23 @@ class HanziGame {
         this.onStrokeFeedback && this.onStrokeFeedback(stroke);
     }
     
-    // Handle practice completion
+    // Handle practice completion.
+    //
+    // Idempotency guard (BUG FIX): The writer's `onComplete` callback fires
+    // on every completed drawing, and the UI advances the phrase sequence on
+    // its own timer. Without a guard, the same character could be "counted"
+    // more than once (double XP, inflated practice counts). We mark the
+    // session as already-counted immediately, and ignore any later callbacks
+    // for the same session.
     handleComplete(summary) {
         if (!this.currentCharacter) return;
+        
+        // Already counted this session? (e.g. a delayed second onComplete
+        // callback for the same completed drawing.)
+        if (this.sessionData && this.sessionData._counted) {
+            return;
+        }
+        if (this.sessionData) this.sessionData._counted = true;
         
         const completionTime = Date.now() - this.practiceStartTime;
         
@@ -296,15 +310,34 @@ class HanziGame {
             summary
         });
         
-        // Record the practice session
+        // Record the practice session (this also gives XP to the character).
         const result = this.currentCharacter.recordPractice(
             this.currentMistakes,
             accuracy,
             completionTime
         );
         
-        // Add XP to player
-        const playerLeveledUp = this.player.addXP(Math.floor(result.xpGained / 2));
+        // Award XP to the player.
+        //   - SOLO character practice: player gets XP (scaled by stroke
+        //     difficulty, capped at the character's own XP gain) + a small
+        //     player bonus of 25% of that amount (so solo practice rewards
+        //     less than a completed phrase, which pays out a bigger bonus).
+        //   - PHRASE practice: player XP is deferred to
+        //     completePhraseSequence(), which pays a bigger phrase bonus
+        //     (sum of component sessions × multiplier + first-time/variety
+        //     bonuses). This is what makes "phrases are worth more than
+        //     solo characters" in the economy.
+        const inPhraseMode = this.isPhrasePractice();
+        const playerXP = inPhraseMode
+            ? 0
+            : Math.max(Economy.MIN_XP,
+                Math.floor(Economy.strokeWeight(this.currentCharacter.strokes) * result.xpGained));
+        const playerLeveledUp = this.player.addXP(playerXP);
+        
+        // Remember this session's XP on the character (used by phrase-completion
+        // XP calculation so a phrase is worth the sum of its component
+        // sessions times the phrase multiplier).
+        this.currentCharacter.lastSessionXP = result.xpGained;
         this.player.totalPracticeTime += completionTime;
         this.player.practiceCount += 1; // Increment practice count for battle unlock
         
@@ -410,10 +443,39 @@ class HanziGame {
         }
     }
     
+    // Cancel the current phrase sequence (used by the UI when the player
+    // presses "Next Practice" mid-phrase or "Back").
+    cancelPhraseSequence() {
+        if (this.currentPhrase) {
+            // Reset per-component markers so the next session starts fresh
+            for (const charText of this.currentPhrase.characters) {
+                const ch = this.characters[charText];
+                if (ch) ch.lastSessionXP = null;
+            }
+            this.currentPhrase = null;
+            this.currentPhraseIndex = 0;
+            this.saveGame();
+        }
+    }
+    
+    // Cleanly abandon the current practice session (single character or
+    // mid-phrase). Prevents leftover phrase state from corrupting the next
+    // session (BUG: previously "Back" left currentPhrase set, so the next
+    // single-character practice was treated as phrase practice).
+    exitPracticeSession() {
+        this.cancelPhraseSequence();
+        this.currentCharacter = null;
+        this.currentWriter = null;
+        this.practiceStartTime = null;
+        this.currentMistakes = 0;
+        this.sessionData = { mistakes: [], strokes: [], startTime: null };
+    }
+    
     // Reset current practice
     resetPractice() {
-        if (!this.currentWriter) return;
-        this.currentWriter.cancelQuiz();
+        if (this.currentWriter) {
+            try { this.currentWriter.cancelQuiz(); } catch (e) { /* no quiz active */ }
+        }
         this.practiceStartTime = Date.now();
         this.currentMistakes = 0;
         this.sessionData = {
@@ -421,7 +483,14 @@ class HanziGame {
             strokes: [],
             startTime: this.practiceStartTime
         };
-        setTimeout(() => this.currentWriter.quiz(), 500);
+        // Re-enter quiz mode after a brief delay so the writer has time to
+        // render the next stroke.
+        if (this.currentWriter) {
+            setTimeout(() => {
+                try { if (this.currentWriter && !this.currentWriter.quiz) { /* legacy */ return; } this.currentWriter.quiz(); }
+                catch (e) { /* already in quiz mode */ }
+            }, 500);
+        }
     }
     
     // Start a phrase practice sequence
@@ -482,41 +551,72 @@ class HanziGame {
         }
     }
     
-    // Calculate performance-based XP for phrase completion
+    // Calculate performance-based XP for phrase completion.
+    //
+    // The XP is computed by summing the XP each *component character* earned
+    // during this session, then multiplying by a phrase multiplier (>= 1.5)
+    // plus a first-time bonus and a "variety bonus" that grows the more
+    // DISTINCT phrases the player has trained. This makes phrases worth
+    // MORE than single characters, and rewards breadth of practice.
     calculatePhraseXP() {
-        if (!this.currentPhrase || this.phraseSessionData.characterCount === 0) {
-            // Fallback to old system if no session data
-            return this.currentPhrase ? this.currentPhrase.characters.length * 10 : 20;
+        if (!this.currentPhrase) {
+            return 0;
         }
         
-        // Calculate average performance across all characters in the phrase
-        const averageAccuracy = this.phraseSessionData.accuracySum / this.phraseSessionData.characterCount;
-        const averageTime = this.phraseSessionData.totalTime / this.phraseSessionData.characterCount;
-        const totalMistakes = this.phraseSessionData.totalMistakes;
-        const phraseLength = this.currentPhrase.characters.length;
-        
-        // Use similar formula to character XP calculation, but scaled for phrases
-        const baseXP = 20 * phraseLength; // Base XP scales with phrase length
-        const accuracyBonus = Math.floor((averageAccuracy / 100) * 30 * phraseLength); // Accuracy bonus scales with length
-        const speedBonus = (averageTime < 30000) ? 10 * phraseLength : 0; // Speed bonus scales with length
-        const mistakePenalty = totalMistakes * 2; // Flat penalty per mistake
-        
-        // Calculate final XP with minimum of base XP / 4
-        const finalXP = Math.max(baseXP / 4, baseXP + accuracyBonus + speedBonus - mistakePenalty);
-        
-        console.log('Phrase XP calculation:', {
-            phraseLength,
-            averageAccuracy: Math.round(averageAccuracy),
-            averageTime: Math.round(averageTime),
-            totalMistakes,
-            baseXP,
-            accuracyBonus,
-            speedBonus,
-            mistakePenalty,
-            finalXP: Math.round(finalXP)
+        // Collect the per-character XP from this session. We use each
+        // character's final `xpGained` if we captured it; otherwise we
+        // fall back to the current character's last recorded session.
+        const charsXP = this.currentPhrase.characters.map(charText => {
+            const ch = this.characters[charText];
+            if (ch && typeof ch.lastSessionXP === 'number') {
+                return ch.lastSessionXP;
+            }
+            // Fallback estimate based on stroke weight
+            const strokes = ch ? ch.strokes : 5;
+            return Economy.MIN_XP + Economy.strokeWeight(strokes) * Economy.CHARACTER_BASE_XP;
         });
         
-        return Math.round(finalXP);
+        const isFirst = !this.currentPhrase.firstTimeCompleted;
+        const distinctTrained = this.getDistinctPhrasesTrainedExcluding(this.currentPhrase.text);
+        
+        const xp = Economy.phraseCompletionXP(charsXP, isFirst, distinctTrained);
+        
+        console.log('Phrase XP calculation:', {
+            phraseText: this.currentPhrase.text,
+            charsXP,
+            isFirst,
+            distinctTrained,
+            finalXP: xp
+        });
+        
+        return xp;
+    }
+    
+    // How many DISTINCT phrases has the player trained (at least once),
+    // excluding the one about to be (re-)trained now? Drives the variety bonus.
+    getDistinctPhrasesTrainedExcluding(text) {
+        let count = 0;
+        for (const [t, p] of Object.entries(this.phrases)) {
+            if (t !== text && p && p.totalPractices > 0) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    // Reset per-session XP markers on components so the next session starts fresh
+    clearLastSessionXP() {
+        if (!this.currentPhrase) {
+            // Also clear any left over from normal practice (character) so it's not stale
+            for (const ch of Object.values(this.characters)) {
+                ch.lastSessionXP = null;
+            }
+            return;
+        }
+        for (const charText of this.currentPhrase.characters) {
+            const ch = this.characters[charText];
+            if (ch) ch.lastSessionXP = null;
+        }
     }
     
     // Complete phrase practice sequence
@@ -540,11 +640,20 @@ class HanziGame {
         // If this is the first time completing the phrase, add it as a character
         if (practiceResult.isFirstCompletion) {
             this.createPhraseCharacter(this.currentPhrase);
+            // Fix: on first completion the phrase-character still earns XP for
+            // this session (previously it stayed at 0 XP forever on the first
+            // pass, then jumped to "half" on subsequent passes).
+            const phraseCharacter = this.characters[this.currentPhrase.text];
+            if (phraseCharacter) {
+                const phraseXP = Math.max(Economy.MIN_XP, Math.floor(bonusXP * Economy.PHRASE_CHAR_SHARE));
+                completionData.phraseCharacterXP = phraseXP;
+                completionData.phraseCharacterLeveledUp = phraseCharacter.addXP(phraseXP);
+            }
         } else {
             // If phrase character already exists, give it XP too
             const phraseCharacter = this.characters[this.currentPhrase.text];
             if (phraseCharacter && phraseCharacter.isPhraseCharacter) {
-                const phraseXP = Math.floor(bonusXP / 2); // Give phrase character half the bonus XP
+                const phraseXP = Math.max(Economy.MIN_XP, Math.floor(bonusXP * Economy.PHRASE_CHAR_SHARE)); // Give phrase character the char-share of the bonus
                 const phraseLeveledUp = phraseCharacter.addXP(phraseXP);
                 completionData.phraseCharacterXP = phraseXP;
                 completionData.phraseCharacterLeveledUp = phraseLeveledUp;
@@ -731,7 +840,11 @@ class HanziGame {
         const totalCharacters = Object.keys(this.characters).length;
         const unlockedPhrases = Object.values(this.phrases).filter(p => p.unlocked).length;
         const totalPractices = Object.values(this.characters).reduce((sum, char) => sum + char.totalPractices, 0);
-        const averageAccuracy = Object.values(this.characters).reduce((sum, char) => sum + char.getAccuracy(), 0) / totalCharacters;
+        // Bug fix: previously divided by totalCharacters unconditionally →
+        // NaN (and crash in some UI) for a fresh/empty game.
+        const averageAccuracy = totalCharacters > 0
+            ? Object.values(this.characters).reduce((sum, char) => sum + char.getAccuracy(), 0) / totalCharacters
+            : 0;
         
         return {
             playerLevel: this.player.level,
@@ -1046,8 +1159,10 @@ class HanziGame {
         return result;
     }
     
-    // Add defeated opponent to player's collection
-    addDefeatedOpponent(opponent) {
+    // Add defeated opponent to player's collection.
+    // `fighterCharacter` (optional) is the live player Character object that
+    // participated in the battle; it earns the per-battle XP bonus.
+    addDefeatedOpponent(opponent, fighterCharacter = null) {
         const captureResult = {};
         
         if (opponent.isPhrase) {
@@ -1055,14 +1170,21 @@ class HanziGame {
             if (!this.phrases[opponent.name]) {
                 this.phrases[opponent.name] = new Phrase(opponent.name, opponent.originalData);
             }
-            // Unlock the phrase and reset to level 1
+            
+            // Bug fix: only count the phrase as newly captured if it was NOT
+            // already unlocked (previously totalPhrases was incremented every
+            // battle victory, inflating the counter).
+            const wasUnlocked = this.phrases[opponent.name].unlocked;
             this.phrases[opponent.name].unlocked = true;
-            this.phrases[opponent.name].level = 1;
-            this.phrases[opponent.name].xp = 0;
-            this.player.totalPhrases++;
+            if (!wasUnlocked) {
+                this.phrases[opponent.name].level = 1;
+                this.phrases[opponent.name].xp = 0;
+                this.player.totalPhrases++;
+            }
             
             captureResult.type = 'phrase';
             captureResult.name = opponent.name;
+            captureResult.isNewCapture = !wasUnlocked;
         } else {
             // Add character to collection if not already there
             if (!this.characters[opponent.name]) {
@@ -1072,12 +1194,32 @@ class HanziGame {
                 captureResult.type = 'character';
                 captureResult.name = opponent.name;
                 captureResult.success = result.success;
+                captureResult.isNewCapture = result.success;
             } else {
                 captureResult.type = 'character';
                 captureResult.name = opponent.name;
                 captureResult.success = false;
+                captureResult.isNewCapture = false;
                 captureResult.message = 'Already owned';
             }
+        }
+        
+        // BATTLE REWARDS — battles earn more XP than passive capture (base
+        // scales with opponent level, first-time captures get a capture
+        // bonus). Per-character battles still reward but taper off via
+        // repeatMultiplier so one low-level opponent can't be farmed forever.
+        if (fighterCharacter) {
+            const base = Economy.battleReward(opponent, !!captureResult.isNewCapture);
+            const battlesFought = (fighterCharacter.totalBattles || 0) + 1;
+            const tapered = Math.max(Economy.MIN_XP,
+                Math.round(base * Economy.repeatMultiplier(battlesFought)));
+            fighterCharacter.totalBattles = battlesFought;
+            const fighterLeveled = fighterCharacter.addXP(tapered);
+            const playerLeveled = this.player.addXP(base);
+            captureResult.battleXP = base;
+            captureResult.fighterXP = tapered;
+            captureResult.fighterLeveledUp = fighterLeveled;
+            captureResult.playerBattleLeveledUp = playerLeveled;
         }
         
         // Check for item drops

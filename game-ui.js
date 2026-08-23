@@ -111,7 +111,16 @@ class GameUI {
         // Note: game-reset-btn event listener is set up in initializeSettingsDropdown() to include dropdown closing
         
         // Navigation events
-        document.getElementById('back-btn').addEventListener('click', () => this.showScreen('character-select'));
+        document.getElementById('back-btn').addEventListener('click', () => {
+            // Bug fix: previously "Back" only changed screens but left
+            // currentPhrase/currentCharacter state intact, so the next
+            // single-character practice was treated (incorrectly) as
+            // phrase practice. Now we clean up the session properly.
+            if (this.game && this.game.exitPracticeSession) {
+                this.game.exitPracticeSession();
+            }
+            this.showScreen('character-select');
+        });
         document.getElementById('back-to-select').addEventListener('click', () => this.showScreen('character-select'));
         document.getElementById('back-from-evolution').addEventListener('click', () => this.showScreen('character-select'));
         document.getElementById('items-back-btn').addEventListener('click', () => this.showScreen('character-select'));
@@ -730,8 +739,15 @@ class GameUI {
                     // Clear localStorage
                     localStorage.removeItem('hanzi-game-save');
                     
-                    // Also clear any practice tracker data
-                    localStorage.removeItem('practice-tracker-data');
+                    // Also clear any practice tracker data (bug fix: was using the
+                    // wrong storage key, so battle lock/unlock state was NOT
+                    // actually reset).
+                    localStorage.removeItem('hanzi-game-practice-tracker');
+                    
+                    // Reset the practice tracker instance in memory (it caches)
+                    if (this.practiceTracker && this.practiceTracker.reset) {
+                        this.practiceTracker.reset();
+                    }
                     
                     // Reset the game instance in memory
                     this.game.resetToDefaults();
@@ -1158,17 +1174,39 @@ class GameUI {
         }, 1500);
     }
     
+    // Resolve the real Character object (the battle team members are copies
+    // made with object-spread, so mutating `fighter` directly would not
+    // persist XP/level back to the saved character).
+    resolveFighterCharacter(fighter) {
+        if (!fighter) return null;
+        const real = this.game.characters && this.game.characters[fighter.char];
+        return real || fighter;
+    }
+    
     // Handle enemy defeated
     handleEnemyDefeated() {
         const enemy = this.battleState.enemy;
+        const fighter = this.resolveFighterCharacter(this.battleState.currentPlayerCharacter);
         this.addBattleMessage(`${enemy.name} is defeated!`, 'victory');
         
-        // Record battle usage to lock battles again
+        // Record battle usage to lock battles again (once — not per capture)
         const battleLockResult = this.practiceTracker.recordBattleUsed();
-        this.addBattleMessage(battleLockResult.message, 'info');
         
-        // Add defeated opponent to collection
-        const addResult = this.game.addDefeatedOpponent(enemy);
+        // Add defeated opponent to collection AND award battle/reward XP
+        const addResult = this.game.addDefeatedOpponent(enemy, fighter);
+        
+        // Show the battle/reward XP the fighter just earned (battles are a
+        // big XP source — worth more than passive capture of the same word).
+        if (addResult.battleXP) {
+            let xpMsg = `⚔️ +${addResult.battleXP} battle XP!`;
+            if (addResult.isNewCapture) {
+                xpMsg += (fighter && fighter.char) ? ` ${fighter.char} earned +${addResult.fighterXP} extra!` : '';
+            }
+            this.addBattleMessage(xpMsg, 'loot');
+        }
+        if (addResult.fighterLeveledUp && fighter) {
+            this.addBattleMessage(`✨ ${fighter.char} leveled up in battle!`, 'victory');
+        }
         
         if (addResult.type === 'character') {
             this.addBattleMessage(`You captured ${addResult.name}! It's now in your practice list!`, 'victory');
@@ -1182,6 +1220,9 @@ class GameUI {
                 this.addBattleMessage(`Found item: ${drop.item.name}! 🎁`, 'loot');
             });
         }
+        
+        // Persist the captured character/phrase and the battle XP earned
+        this.game.saveGame();
         
         // Update game stats and battle button
         this.updateHeaderStats();

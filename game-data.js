@@ -114,8 +114,13 @@ const DEFAULT_ITEMS = {
 // Item class
 class Item {
     constructor(itemId, data = {}) {
+        // Bug fix: when the item id is unknown, `data` holds both the item
+        // definition AND the quantity. Previously quantity was read from
+        // `itemData` (the default template), so newly-added custom items
+        // always started at quantity 1.
         const itemData = DEFAULT_ITEMS[itemId] || data;
-        
+        const defaultQuantity = (data && data.quantity) || 1;
+
         this.id = itemData.id || itemId;
         this.name = itemData.name || 'Unknown Item';
         this.description = itemData.description || '';
@@ -123,7 +128,7 @@ class Item {
         this.value = itemData.value || 0;
         this.rarity = itemData.rarity || 'common';
         this.icon = itemData.icon || '📦';
-        this.quantity = data.quantity || 1;
+        this.quantity = defaultQuantity;
     }
     
     // Use the item on a character (for XP boosts)
@@ -185,7 +190,7 @@ class Bag {
         } else {
             // New item, check if we have space
             if (Object.keys(this.items).length >= this.maxSlots) {
-                return { success: false, message: 'Bag is full!' };
+                return { success: false, item: null, message: 'Bag is full!' };
             }
             
             this.items[itemId] = new Item(itemId, { quantity: quantity });
@@ -236,9 +241,9 @@ class Bag {
         return result;
     }
     
-    // Get all items in the bag
+    // Get all items in the bag (excluding empty stacks)
     getAllItems() {
-        return Object.values(this.items);
+        return Object.values(this.items).filter(item => item.quantity > 0);
     }
     
     // Get items by type
@@ -266,6 +271,127 @@ class Bag {
     }
 }
 
+// ============================================================
+// ECONOMY — central source of truth for all XP formulas.
+//
+// Design intent for younger kids:
+//  * Phrases are worth MORE than the sum of their single characters.
+//  * Battles are worth MORE than passive capture (bigger XP + better item drops).
+//  * Repeating the SAME easy word has diminishing returns (tapered multiplier),
+//    while training NEW or DIVERSE phrases is rewarded with a "variety bonus".
+//  * First-time completion of a phrase is a big milestone reward.
+// ============================================================
+const Economy = {
+    // ---- Single-character practice ----------------------------------------------------
+    CHARACTER_BASE_XP: 20,           // base XP before bonuses
+    CHARACTER_ACCURACY_BONUS: 30,    // up to +30 for perfect accuracy
+    CHARACTER_SPEED_BONUS: 10,       // +10 if under 30s
+    MISTAKE_PENALTY: 2,              // -2 per mistake
+    MIN_XP: 5,                       // a completed practice always yields >=5
+
+    // Stroke-difficulty weights: harder (more strokes) = more valuable XP.
+    STROKE_WEIGHTS: [
+        { upTo: 3,  weight: 1.0 },
+        { upTo: 6,  weight: 1.15 },
+        { upTo: 10, weight: 1.3 },
+        { upTo: 15, weight: 1.5 },
+        { upTo: 99, weight: 1.75 }
+    ],
+
+    // Repeating the same character: reward tapers via exponential decay
+    //  -> multiplier = floor + (1 - floor) * exp(-ln2 * repeats / halfLife)
+    REPEAT_HALF_LIFE: 5,             // ~half XP after ~5 more repeats
+    REPEAT_FLOOR: 0.15,              // never below 15% of base (still rewarding)
+
+    // ---- Phrase training (sequence practice) ----------------------------------------
+    PHRASE_MULT: 1.5,                // phrase XP >= 1.5x the sum of its chars
+    PHRASE_FIRST_TIME_BONUS: 50,     // first completion bonus (per phrase)
+    PHRASE_CHAR_REWARD: 'PHRASE_CHAR_SHARE',  // (semantic marker, see below)
+    PHRASE_CHAR_SHARE: 0.5,          // each component char gets 50% of the phrase bonus
+
+    // ---- Battle rewards ---------------------------------------------------------------
+    BATTLE_BASE_XP_PER_LEVEL: 8,     // XP per opponent level (min 1)
+    BATTLE_CAPTURE_BONUS: 20,        // +20 XP when the first capture lands
+    BATTLE_REBATTLE_XP_MULT: 0.75,   // fighting again is still rewarded
+    BATTLE_ITEM_CHANCE: 0.25,
+    BATTLE_ITEM_RARITY_BIAS: 0.15,   // +15% chance for a rarer tier per Lvl/Diff
+
+    // ---- Phrase diversity (training ALL phrases vs. ONE) ------------------------------
+    // For each phrase the player has already practiced at least once, we reward
+    // them again with a "diversity bonus" proportional to how many DISTINCT
+    // phrases they have trained since the last one. This encourages variety.
+    DIVERSITY_BONUS_START: 0.05,     // 5% for first other phrase trained
+    DIVERSITY_BONUS_STEP: 0.075,     // +7.5% for each additional distinct phrase
+    DIVERSITY_BONUS_MAX: 0.6,        // cap at +60%
+
+    // ============================================================
+    // Helpers
+    // ============================================================
+
+    // Weight for a given stroke count (higher = harder = more valuable)
+    strokeWeight(strokeCount) {
+        const s = Math.max(1, Number(strokeCount) || 1);
+        for (const tier of Economy.STROKE_WEIGHTS) {
+            if (s <= tier.upTo) return tier.weight;
+        }
+        return 1;
+    },
+
+    // Tapered multiplier for repeated practice of the SAME character.
+    // 1.0 at first use, halves roughly every `halfLife` additional uses,
+    // never dropping below `floor`.
+    repeatMultiplier(repeats, halfLife = Economy.REPEAT_HALF_LIFE, floor = Economy.REPEAT_FLOOR) {
+        const r = Math.max(1, Number(repeats) || 1);
+        const decay = Math.exp(-Math.LN2 * (r - 1) / Math.max(1, halfLife));
+        return Math.max(floor, floor + (1 - floor) * decay);
+    },
+
+    // How much extra XP does a phrase get over single-character practice
+    // (as a multiplier applied to the phrase's total XP)?
+    phraseMultiplier(length) {
+        const len = Math.max(1, Number(length) || 1);
+        // Slight extra reward for longer phrases (3+ characters)
+        const lengthBonus = len >= 3 ? 0.1 : 0;
+        return Economy.PHRASE_MULT + lengthBonus;
+    },
+
+    // XP for completing a phrase sequence.
+    //  - `charsXP` = array of XP values each component character earned this session
+    //                (we use the sum as the "base" so phrases are worth >= 1.5x chars)
+    //  - `isFirst` = first time completing this phrase
+    //  - `distinctTrained` = how many OTHER distinct phrases have been trained since
+    //                        the last one (drives the variety/diversity bonus)
+    phraseCompletionXP(charsXP, isFirst, distinctTrained) {
+        const base = charsXP.reduce((a, b) => a + (Number(b) || 0), 0);
+        const mult = Economy.phraseMultiplier(charsXP.length);
+        const firstTime = isFirst ? Economy.PHRASE_FIRST_TIME_BONUS : 0;
+        const diversity = distinctTrained >= 0 ?
+            Math.min(Economy.DIVERSITY_BONUS_MAX,
+                     Economy.DIVERSITY_BONUS_START +
+                     Math.max(0, distinctTrained - 1) * Economy.DIVERSITY_BONUS_STEP)
+            : 0;
+        const total = (base * mult) + firstTime + (base * diversity);
+        return Math.max(Economy.MIN_XP, Math.round(total));
+    },
+
+    // XP for winning a battle.
+    battleReward(opponent, isCapture) {
+        const level = Math.max(1, opponent.level || 1);
+        const base = Economy.BATTLE_BASE_XP_PER_LEVEL * level;
+        const capture = isCapture ? Economy.BATTLE_CAPTURE_BONUS : 0;
+        // Re-battling a character you already own still rewards, less than capture
+        return Math.max(Economy.MIN_XP, base + capture);
+    },
+
+    // Item drop chance and rare-tier bias for a given opponent
+    itemDropChance(opponent) {
+        return Economy.BATTLE_ITEM_CHANCE;
+    },
+    itemRarityBias(opponent) {
+        return (opponent && (opponent.level || 0)) * Economy.BATTLE_ITEM_RARITY_BIAS;
+    }
+};
+
 // Character progression class
 class Character {
     constructor(char, data = {}) {
@@ -286,6 +412,15 @@ class Character {
         // Phrase character properties
         this.isPhraseCharacter = data.isPhraseCharacter || false;
         this.originalPhrase = data.originalPhrase || null;
+        
+        // Battle history (used for battle-XP tapering — fights the SAME word
+        // taper off, just like repeat practice).
+        this.totalBattles = data.totalBattles || 0;
+        
+        // Per-session XP cache — the XP this character earned in the most
+        // recent practice session. Used by phrase-completion XP so that a
+        // phrase is worth the sum of its component sessions times a multiplier.
+        this.lastSessionXP = (data && typeof data.lastSessionXP === 'number') ? data.lastSessionXP : null;
         
         // Pokemon-style stats derived from character properties
         this.hp = this.calculateHP();
@@ -339,6 +474,13 @@ class Character {
     
     // Add XP and handle level ups
     addXP(amount) {
+        // Bug fix: guard against non-numeric/negative amounts that broke
+        // leveling math (and could cause the while-loop to never advance).
+        amount = Math.max(0, Math.floor(Number(amount) || 0));
+        if (amount <= 0) {
+            return false;
+        }
+        
         // Stop gaining XP if already at max level
         if (this.level >= 10) {
             return false;
@@ -348,8 +490,7 @@ class Character {
         let leveledUp = false;
         
         while (this.xp >= this.getXPForNextLevel() && this.level < 10) {
-            const xpNeeded = this.getXPForNextLevel(); // Get XP needed BEFORE leveling up
-            this.xp -= xpNeeded;
+            this.xp -= this.getXPForNextLevel(); // XP needed BEFORE leveling up
             this.level++;
             leveledUp = true;
             
@@ -369,13 +510,20 @@ class Character {
     }
     
     // Calculate XP reward based on accuracy and performance
-    calculateXPReward(accuracy, mistakeCount, completionTime) {
-        const baseXP = 20;
-        const accuracyBonus = Math.floor(accuracy * 30); // 0-30 bonus
-        const speedBonus = completionTime < 30000 ? 10 : 0; // 10 bonus for under 30 seconds
-        const mistakePenalty = mistakeCount * 2;
+    // Economy: XP scales with stroke difficulty (harder characters are worth
+    // more), and drops with repeated practice of the SAME word (diminishing
+    // returns) so kids can't "farm" one or two easy words forever.
+    calculateXPReward(accuracy, mistakeCount, completionTime, repeats = 1) {
+        const baseXP = Economy.CHARACTER_BASE_XP;
+        const strokeWeight = Economy.strokeWeight(this.strokes);
+        const accuracyBonus = Math.floor(accuracy * Economy.CHARACTER_ACCURACY_BONUS);
+        const speedBonus = completionTime < 30000 ? Economy.CHARACTER_SPEED_BONUS : 0;
+        const mistakePenalty = mistakeCount * Economy.MISTAKE_PENALTY;
         
-        return Math.max(5, baseXP + accuracyBonus + speedBonus - mistakePenalty);
+        const raw = (baseXP + accuracyBonus + speedBonus) * strokeWeight - mistakePenalty;
+        const withRepeat = raw * Economy.repeatMultiplier(repeats, Economy.REPEAT_HALF_LIFE, Economy.REPEAT_FLOOR);
+        
+        return Math.max(Economy.MIN_XP, Math.round(withRepeat));
     }
     
     // Record a practice session
@@ -387,10 +535,13 @@ class Character {
             this.bestAccuracy = accuracy;
         }
         
-        const xpGained = this.calculateXPReward(accuracy / 100, mistakeCount, completionTime);
+        // The character's own practice count is its "repeat count": the first
+        // few sessions earn full XP, later ones taper off toward REPEAT_FLOOR.
+        const repeats = Math.max(1, this.totalPractices);
+        const xpGained = this.calculateXPReward(accuracy / 100, mistakeCount, completionTime, repeats);
         const leveledUp = this.addXP(xpGained);
         
-        return { xpGained, leveledUp, accuracy };
+        return { xpGained, leveledUp, accuracy, repeats };
     }
     
     // Export to JSON
@@ -408,7 +559,9 @@ class Character {
             bestAccuracy: this.bestAccuracy,
             unlocked: this.unlocked,
             isPhraseCharacter: this.isPhraseCharacter,
-            originalPhrase: this.originalPhrase
+            originalPhrase: this.originalPhrase,
+            totalBattles: this.totalBattles,
+            lastSessionXP: this.lastSessionXP
         };
     }
 }
@@ -567,14 +720,32 @@ class Player {
     }
     
     addXP(amount) {
+        // Bug fix: guard against non-numeric / negative amounts (e.g. from
+        // a corrupt save or bad input) to prevent negative XP or infinite
+        // level-drift loops.
+        amount = Math.max(0, Math.floor(Number(amount) || 0));
+        if (amount <= 0) {
+            return false;
+        }
+        
         this.xp += amount;
         let leveledUp = false;
         
-        while (this.xp >= this.getXPForNextLevel()) {
+        // Cap the number of level-ups per call to prevent runaway loops if
+        // xp somehow became astronomically large from a corrupt save.
+        const MAX_LEVEL_UPS_PER_CALL = 100;
+        let guard = 0;
+        while (this.xp >= this.getXPForNextLevel() && guard++ < MAX_LEVEL_UPS_PER_CALL) {
             const xpNeeded = this.getXPForNextLevel(); // Get XP needed BEFORE leveling up
+            if (xpNeeded <= 0) break; // safety: avoid infinite loop
             this.xp -= xpNeeded;
             this.level++;
             leveledUp = true;
+        }
+        
+        // If we hit the guard, discard the excess to keep the state sane
+        if (this.xp >= this.getXPForNextLevel()) {
+            this.xp = this.xp % Math.max(1, this.getXPForNextLevel());
         }
         
         return leveledUp;
