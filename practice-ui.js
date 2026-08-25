@@ -58,7 +58,7 @@ class PracticeUI {
                 <span class="progress-text" id="progress-text">0/10</span>
             </div>
             <div class="progress-tooltip" id="progress-tooltip">
-                Complete practice sessions to unlock Battle mode
+                Complete practice with DIFFERENT characters to unlock Battle mode
             </div>
         `;
         
@@ -104,8 +104,8 @@ class PracticeUI {
             
             const remaining = this.practiceTracker.getPracticesRemaining();
             const message = remaining === 1 
-                ? `Complete 1 more practice session to unlock Battle mode!`
-                : `Complete ${remaining} more practice sessions to unlock Battle mode!`;
+                ? `Train 1 more different character to unlock Battle mode!`
+                : `Train ${remaining} more different characters to unlock Battle mode!`;
             
             this.gameUI.showMessage(message, 'info');
             
@@ -134,8 +134,8 @@ class PracticeUI {
         } else {
             const remaining = status.practicesRemaining;
             tooltipText = remaining === 1
-                ? 'Complete 1 more practice to unlock'
-                : `Complete ${remaining} more practices to unlock`;
+                ? 'Train 1 more different character to unlock'
+                : `Train ${remaining} more different characters to unlock`;
         }
         
         this.battleButton.setAttribute('title', tooltipText);
@@ -162,7 +162,7 @@ class PracticeUI {
                     <div class="modal-body celebration-body">
                         <div class="celebration-message">
                             <p><strong>Congratulations!</strong></p>
-                            <p>You've completed 10 practice sessions and unlocked Battle mode!</p>
+                            <p>You've trained 10 different characters and unlocked Battle mode!</p>
                             <p>Now you can battle wild characters and phrases to test your skills and earn rewards.</p>
                         </div>
                         <div class="celebration-stats" id="celebration-stats">
@@ -311,8 +311,8 @@ class PracticeUI {
             
             const remaining = status.practicesRemaining;
             const tooltipText = remaining === 1
-                ? 'Complete 1 more practice to unlock'
-                : `Complete ${remaining} more practices to unlock`;
+                ? 'Train 1 more different character to unlock'
+                : `Train ${remaining} more different characters to unlock`;
             this.battleButton.setAttribute('title', tooltipText);
         }
     }
@@ -346,8 +346,8 @@ class PracticeUI {
             } else {
                 const remaining = status.practicesRemaining;
                 progressTooltip.textContent = remaining === 1
-                    ? 'Complete 1 more practice session to unlock Battle mode'
-                    : `Complete ${remaining} more practice sessions to unlock Battle mode`;
+                    ? 'Train 1 more different character to unlock Battle mode'
+                    : `Train ${remaining} more different characters to unlock Battle mode`;
                 this.progressIndicator.classList.remove('completed');
             }
         }

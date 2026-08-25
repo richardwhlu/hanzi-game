@@ -222,10 +222,10 @@ class GameUI {
             battleBtn.title = 'Battle wild characters and phrases!';
             battleBtn.classList.remove('locked');
         } else {
-            // Show progress since last battle if battles have been used, otherwise show total progress
-            const practicesShown = status.battleUsageCount > 0 ? status.practicesSinceBattle : status.practiceCount;
-            battleBtn.textContent = `🔒 Battle (${practicesShown}/${status.practicesRequired})`;
-            battleBtn.title = `Complete ${status.practicesRemaining} more practice sessions to unlock battles`;
+            // v2: unlock progress = DISTINCT characters trained
+            const distinct = status.distinctTrained !== undefined ? status.distinctTrained : status.practiceCount;
+            battleBtn.textContent = `🔒 Battle (${distinct}/${status.practicesRequired})`;
+            battleBtn.title = `Train ${status.practicesRemaining} more different character${status.practicesRemaining === 1 ? '' : 's'} to unlock battles (same character doesn't count more than once)`;
             battleBtn.classList.add('locked');
         }
     }
@@ -401,9 +401,20 @@ class GameUI {
     handlePracticeComplete(data) {
         const { character, result, playerLeveledUp, newUnlocks, sessionStats, isPhrasePractice, phraseProgress } = data;
         
-        // Track practice completion for battle unlock system
+        // Track practice completion for battle unlock system (v2: counts
+        // DISTINCT characters, not raw sessions — spams the same char and
+        // you don't get closer to battle).
         if (!isPhrasePractice || (phraseProgress && phraseProgress.isLastCharacter)) {
-            const practiceResult = this.practiceTracker.incrementPracticeCount(sessionStats);
+            const trackerInfo = {
+                ...sessionStats,
+                character: isPhrasePractice && phraseProgress && phraseProgress.phrase
+                    ? null : character,
+                phrase: isPhrasePractice && phraseProgress && phraseProgress.phrase
+                    ? phraseProgress.phrase.text
+                    : null,
+                isPhrasePractice: !!isPhrasePractice
+            };
+            const practiceResult = this.practiceTracker.incrementPracticeCount(trackerInfo);
             if (practiceResult.message) {
                 this.showMessage(practiceResult.message, practiceResult.justUnlocked ? 'success' : 'info');
             }
@@ -801,7 +812,7 @@ class GameUI {
         if (!this.practiceTracker.isBattleUnlocked()) {
             const status = this.practiceTracker.getStatus();
             this.showMessage(
-                `Battles are locked! Complete ${status.practicesRemaining} more practice sessions to unlock battles. (${status.practiceCount}/${status.practicesRequired})`,
+                `Battles are locked! Train ${status.practicesRemaining} more different character${status.practicesRemaining === 1 ? '' : 's'} to unlock battles. (${status.distinctTrained !== undefined ? status.distinctTrained : status.practiceCount}/${status.practicesRequired} distinct)`,
                 'info'
             );
             return;
@@ -1236,7 +1247,7 @@ class GameUI {
         this.addBattleMessage('Battle complete! Returning to practice to unlock more battles...', 'info');
         setTimeout(() => {
             this.showScreen('character-select');
-            this.showMessage('Victory! Complete 10 more practice sessions to battle again.', 'success');
+            this.showMessage('Victory! Train more different characters to battle again.', 'success');
         }, 3000);
     }
     

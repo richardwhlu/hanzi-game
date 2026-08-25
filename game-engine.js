@@ -210,6 +210,14 @@ class HanziGame {
                 delayBetweenStrokes: 100,
                 strokeHighlightSpeed: 2,
                 
+                // Blank-slate mode: start with an EMPTY box; strokes only
+                // appear as the kid draws them (or when a hint is shown).
+                // This matches what writing on paper looks like — no ghost
+                // of the whole character waiting to be copied.
+                showCharacter: false,
+                strokeColor: '#222',          // color of the kid's own strokes
+                radicalColor: 'transparent',  // no ghost character at all
+                
                 // Quiz configuration
                 showHintAfterMisses: 3,
                 leniency: 1.2, // Slightly more lenient for kids
@@ -860,43 +868,84 @@ class HanziGame {
     
     // BATTLE SYSTEM METHODS
     
-    // Generate a wild character/phrase for battle
+    // Generate a wild opponent for battle.
+    //
+    // IMPORTANT: opponents are drawn ONLY from characters and phrases the
+    // player already owns — never from the full vocabulary pack. This keeps
+    // the practice set stable: a battle should reinforce what the kid
+    // already knows, not lure them into a bunch of new "shiny" 1-stroke
+    // characters to farm.
     generateWildOpponent() {
-        // Get all possible characters and phrases from active data that player doesn't have
-        const wildCharacters = [];
-        const wildPhrases = [];
+        const ownedCharacters = Object.entries(this.characters)
+            .filter(([, c]) => c && c.unlocked !== false && !c.isPhraseCharacter)
+            .map(([char, c]) => ({ char, ...this.getCharacterDataForChar(char), level: c.level || 1, isWild: true }));
         
-        // Get active data from DataManager
-        const activeCharacterData = this.dataManager.getActiveCharacterData();
-        const activePhraseData = this.dataManager.getActivePhraseData();
+        const ownedPhrases = Object.entries(this.phrases)
+            .filter(([, p]) => p && p.unlocked)
+            .map(([text, p]) => ({ text, ...this.getPhraseDataForPhrase(text), isWild: true, isPhrase: true, level: Math.max(1, p.level || 1) }));
         
-        // Find characters from active character data that player doesn't have
-        for (const [char, data] of Object.entries(activeCharacterData)) {
-            if (!this.characters[char]) {
-                wildCharacters.push({ char, ...data, isWild: true });
-            }
-        }
+        const allOpponents = [...ownedCharacters, ...ownedPhrases];
         
-        // Find phrases from active phrase data that player doesn't have unlocked
-        for (const [text, data] of Object.entries(activePhraseData)) {
-            if (!this.phrases[text] || !this.phrases[text].unlocked) {
-                wildPhrases.push({ text, ...data, isWild: true, isPhrase: true });
-            }
-        }
-        
-        // Combine all possible opponents
-        const allOpponents = [...wildCharacters, ...wildPhrases];
-        
+        // If the player somehow owns nothing, refuse to invent a new
+        // character — return a safe empty opponent (no capture possible)
+        // so the UI can tell the player to practice first. This is the
+        // hard guarantee that a battle NEVER introduces characters outside
+        // the kid's set.
         if (allOpponents.length === 0) {
-            // If no wild opponents available, generate a random strong character
-            return this.generateRandomOpponent();
+            return {
+                name: '？',
+                pinyin: '',
+                meaning: 'empty set — practice a character first',
+                isPhrase: false,
+                isWild: true,
+                noCapture: true,
+                emptySetFallback: true,
+                strokes: 1,
+                difficulty: 1,
+                frequency: 50,
+                level: Math.max(1, this.getPlayerLevelStats().averageLevel || 1)
+            };
         }
         
-        // Pick an opponent with stroke-based weighting for early game progression
         const opponent = this.selectWeightedOpponent(allOpponents);
-        
-        // Create battle-ready opponent with stats
         return this.createBattleOpponent(opponent);
+    }
+    
+    // Pull the data record for a character by trying the active data source
+    // (custom or built-in) — used for opponent stat construction.
+    getCharacterDataForChar(char) {
+        const active = this.dataManager.getActiveCharacterData();
+        if (active && active[char]) {
+            return {
+                pinyin: active[char].pinyin,
+                strokes: active[char].strokes,
+                difficulty: active[char].difficulty,
+                frequency: active[char].frequency,
+                originalData: active[char]
+            };
+        }
+        // Fall back to the character's own stored data — should always be
+        // present because the kid owns it.
+        const c = this.characters[char];
+        return {
+            pinyin: c.pinyin || '',
+            strokes: c.strokes || 5,
+            difficulty: c.difficulty || 1,
+            frequency: c.frequency || 50,
+            originalData: c.toJSON ? c.toJSON() : {}
+        };
+    }
+    
+    getPhraseDataForPhrase(text) {
+        const active = this.dataManager.getActivePhraseData();
+        const src = (active && active[text]) || this.phrases[text] || {};
+        return {
+            pinyin: src.pinyin || '',
+            meaning: src.meaning || '',
+            difficulty: src.difficulty || 1,
+            frequency: src.frequency || 50,
+            characters: src.characters || []
+        };
     }
     
     // Select opponent with preference for simpler characters early in game
@@ -1007,21 +1056,6 @@ class HanziGame {
         battleOpponent.defense = this.calculateOpponentDefense(battleOpponent);
         
         return battleOpponent;
-    }
-    
-    // Generate a random strong opponent when no wild ones available
-    generateRandomOpponent() {
-        const randomChars = ['龙', '凤', '麒', '麟', '神', '魔', '仙', '妖'];
-        const randomChar = randomChars[Math.floor(Math.random() * randomChars.length)];
-        
-        return this.createBattleOpponent({
-            char: randomChar,
-            pinyin: 'mystery',
-            strokes: 15 + Math.floor(Math.random() * 10), // 15-25 strokes
-            difficulty: 4 + Math.floor(Math.random() * 2), // difficulty 4-5
-            frequency: 20 + Math.floor(Math.random() * 30), // frequency 20-50
-            isWild: true
-        });
     }
     
     // Calculate opponent stats based on player's character levels
@@ -1160,12 +1194,20 @@ class HanziGame {
     }
     
     // Add defeated opponent to player's collection.
-    // `fighterCharacter` (optional) is the live player Character object that
-    // participated in the battle; it earns the per-battle XP bonus.
+    // `fighterCharacter` (optional) is the live player Character object
+    // that participated in the battle; it earns the per-battle XP bonus.
     addDefeatedOpponent(opponent, fighterCharacter = null) {
         const captureResult = {};
         
-        if (opponent.isPhrase) {
+        // Opponents the game refuses to add (e.g. the empty-set fallback).
+        // We still award the combat XP, just nothing new enters the set.
+        if (opponent.noCapture) {
+            captureResult.type = opponent.isPhrase ? 'phrase' : 'character';
+            captureResult.name = opponent.name;
+            captureResult.success = false;
+            captureResult.isNewCapture = false;
+            captureResult.noCapture = true;
+        } else if (opponent.isPhrase) {
             // Add phrase to collection if not already there
             if (!this.phrases[opponent.name]) {
                 this.phrases[opponent.name] = new Phrase(opponent.name, opponent.originalData);
