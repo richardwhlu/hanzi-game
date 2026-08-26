@@ -214,9 +214,19 @@ class HanziGame {
                 // appear as the kid draws them (or when a hint is shown).
                 // This matches what writing on paper looks like — no ghost
                 // of the whole character waiting to be copied.
-                showCharacter: false,
-                strokeColor: '#222',          // color of the kid's own strokes
-                radicalColor: 'transparent',  // no ghost character at all
+                //
+                // IMPORTANT (regression 47510f8): do NOT pass
+                // `radicalColor: 'transparent'` or any non-hex/rgba color
+                // string. hanzi-writer 3.5.0 validates colors to hex or
+                // r[g]ba(...) and throws "Invalid color" — which is async
+                // (happens during the char-data load) and silently kills
+                // `quiz()`, so the canvas appears blank AND ignores every
+                // pointer event. With `showCharacter:false` and
+                // `showOutline:false` the character is already hidden —
+                // no radical-color override needed at all.
+                showCharacter: false,   // hides the main character group (opacity 0)
+                showOutline: false,    // also hides the faint outline layer
+                strokeColor: '#222',   // color of the kid's own strokes (valid hex)
                 
                 // Quiz configuration
                 showHintAfterMisses: 3,
