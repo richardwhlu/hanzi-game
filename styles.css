@@ -1639,3 +1639,191 @@ body {
         font-size: 1em;
     }
 }
+
+/* ===================== GRAND TRIALS ===================== */
+
+.trials-btn {
+    background: linear-gradient(135deg, var(--gbc-yellow), #e6a800);
+    color: var(--gbc-dark-green);
+}
+
+.trials-btn:disabled,
+.trials-btn.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.trials-header {
+    text-align: center;
+    margin-bottom: calc(var(--pixel-unit) * 4);
+}
+
+.trials-header h2 {
+    margin-bottom: calc(var(--pixel-unit) * 2);
+}
+
+.trials-subtitle {
+    max-width: 640px;
+    margin: 0 auto;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.trials-list {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--pixel-unit) * 4);
+    margin-bottom: calc(var(--pixel-unit) * 4);
+}
+
+.trial-set-card {
+    border: calc(var(--border-width) * 2) solid var(--gbc-dark-green);
+    border-radius: calc(var(--pixel-unit) * 2);
+    background: var(--gbc-lightest);
+    padding: calc(var(--pixel-unit) * 3);
+    box-shadow: 4px 4px 0 var(--gbc-shadow);
+}
+
+.trial-set-card.locked {
+    opacity: 0.65;
+    border-color: #999;
+    background: #f5f5f5;
+}
+
+.trial-set-card.complete {
+    border-color: var(--gbc-yellow);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+}
+
+.trial-set-header {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(var(--pixel-unit) * 2);
+    margin-bottom: calc(var(--pixel-unit) * 2);
+}
+
+.trial-set-icon {
+    font-size: 34px;
+}
+
+.trial-set-header h3 {
+    margin-bottom: calc(var(--pixel-unit));
+}
+
+.trial-set-intro {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #557755;
+}
+
+.trial-set-badge {
+    margin-left: auto;
+    font-weight: bold;
+    font-size: 13px;
+    border: 2px solid var(--gbc-dark-green);
+    border-radius: calc(var(--pixel-unit));
+    padding: calc(var(--pixel-unit)) calc(var(--pixel-unit) * 2);
+    background: var(--gbc-bg);
+    white-space: nowrap;
+}
+
+.trial-set-card.complete .trial-set-badge {
+    background: var(--gbc-yellow);
+    color: var(--gbc-dark-green);
+}
+
+.trial-lock-note {
+    font-size: 13px;
+    background: #eee;
+    border-radius: calc(var(--pixel-unit));
+    padding: calc(var(--pixel-unit) * 1.5) calc(var(--pixel-unit) * 2);
+    margin-bottom: calc(var(--pixel-unit) * 2);
+}
+
+.trial-rows {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--pixel-unit));
+}
+
+.trial-row {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--pixel-unit) * 2);
+    border: 2px solid #ccc;
+    border-radius: calc(var(--pixel-unit));
+    padding: calc(var(--pixel-unit) * 1.5) calc(var(--pixel-unit) * 2);
+    font-size: 14px;
+    background: var(--gbc-lightest);
+}
+
+.trial-row.is-next {
+    border-color: var(--gbc-blue);
+    background: #eef3ff;
+}
+
+.trial-row-icon {
+    font-size: 18px;
+}
+
+.trial-row-name {
+    font-weight: bold;
+    flex: 1;
+}
+
+.trial-row-level {
+    font-size: 12px;
+    color: #777;
+    white-space: nowrap;
+}
+
+.trial-row-status {
+    font-size: 12px;
+    min-width: 110px;
+    text-align: right;
+}
+
+.trial-rematch-btn {
+    padding: 2px 8px;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+.trial-action {
+    margin-top: calc(var(--pixel-unit) * 2);
+    text-align: right;
+}
+
+.trial-fight-btn {
+    font-size: 15px;
+    padding: calc(var(--pixel-unit) * 2) calc(var(--pixel-unit) * 4);
+}
+
+/* Enemy team panel in trial battles (guardedians' remaining members) */
+#enemy-team {
+    justify-content: center;
+}
+
+.trial-enemy {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.trial-enemy:hover {
+    background: var(--gbc-lightest);
+    transform: none;
+}
+
+.trial-enemy.defeated {
+    opacity: 0.3;
+    text-decoration: line-through;
+}
+
+@media (max-width: 600px) {
+    .trial-row-status {
+        min-width: 80px;
+    }
+    .trial-fight-btn {
+        width: 100%;
+    }
+}

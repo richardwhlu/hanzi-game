@@ -9,6 +9,7 @@ A Pokemon-inspired Chinese character learning game that combines education with 
 - Gain XP through accurate stroke order practice
 - Level up characters to unlock phrase combinations
 - Evolution system where leveled characters combine into powerful phrases
+- 🏆 **Grand Trials**: gym-style 6v6 boss battles (5 per set, 3 sets). Guardians are elite versions of the kid's own characters at fixed levels (2 → 10). Clear all 5 of a set to earn its badge and unlock the next — a concrete "end of set" goal
 
 ### 📚 Educational Focus
 - Real stroke order practice using [hanzi-writer.js](https://github.com/chanind/hanzi-writer)
@@ -34,6 +35,7 @@ A Pokemon-inspired Chinese character learning game that combines education with 
 4. **Level Up**: Characters gain levels and improved stats
 5. **Unlock Phrases**: High-level characters can be combined into phrases
 6. **Evolve**: Create powerful phrase "creatures" by meeting level requirements
+7. **Grand Trials**: Clear 5 guardian battles (6v6) per set to earn badges and unlock the next set — the "boss level" for your progress
 
 ## Character Stats System
 
@@ -101,6 +103,7 @@ This game balances fun with learning by:
 - [x] XP and leveling mechanics  
 - [x] Phrase evolution system
 - [x] Save/load functionality
+- [x] Grand Trials (6v6 badge battles, 3 sets)
 - [ ] Sound effects and music
 - [ ] Achievement system
 - [ ] Multiplayer progress sharing

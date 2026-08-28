@@ -713,6 +713,8 @@ class Player {
         this.totalPracticeTime = data.totalPracticeTime || 0;
         this.practiceCount = data.practiceCount || 0; // Track number of practice sessions
         this.achievements = data.achievements || [];
+        // Grand trial progress: { "0": { cleared: [bool...], wins: {trialIdx: n} }, ... }
+        this.trialProgress = data.trialProgress || {};
     }
     
     getXPForNextLevel() {
@@ -759,7 +761,8 @@ class Player {
             totalPhrases: this.totalPhrases,
             totalPracticeTime: this.totalPracticeTime,
             practiceCount: this.practiceCount,
-            achievements: this.achievements
+            achievements: this.achievements,
+            trialProgress: this.trialProgress
         };
     }
 }

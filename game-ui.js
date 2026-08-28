@@ -56,6 +56,13 @@ class GameUI {
         this.elements.battleMessages = document.getElementById('battle-messages');
         this.elements.attackBtn = document.getElementById('attack-btn');
         this.elements.findOpponentBtn = document.getElementById('find-opponent-btn');
+        this.elements.enemySideTitle = document.getElementById('enemy-side-title');
+        this.elements.enemyTeam = document.getElementById('enemy-team');
+
+        // Grand trial elements
+        this.elements.trialsScreen = document.getElementById('trials-screen');
+        this.elements.trialsList = document.getElementById('trials-list');
+        this.elements.trialsBtn = document.getElementById('trials-btn');
 
         // Items elements
         this.elements.itemsScreen = document.getElementById('items-screen');
@@ -106,6 +113,8 @@ class GameUI {
         // Header button events
         document.getElementById('items-btn').addEventListener('click', () => this.showItemsScreen());
         document.getElementById('battle-btn').addEventListener('click', () => this.startBattle());
+        document.getElementById('trials-btn').addEventListener('click', () => this.showScreen('trials-screen'));
+        document.getElementById('trials-back-btn').addEventListener('click', () => this.showScreen('character-select'));
         // Note: File menu buttons (save, export, load) are handled in setupDropdownMenus()
         document.getElementById('manage-btn').addEventListener('click', () => this.showScreen('manage-screen'));
         // Note: game-reset-btn event listener is set up in initializeSettingsDropdown() to include dropdown closing
@@ -195,6 +204,9 @@ class GameUI {
             case 'items-screen':
                 this.refreshItemsGrid();
                 break;
+            case 'trials-screen':
+                this.refreshTrialsScreen();
+                break;
         }
         
         this.updateHeaderStats();
@@ -210,6 +222,23 @@ class GameUI {
         
         // Update battle button based on lock status
         this.updateBattleButton();
+        this.updateTrialsButton();
+    }
+    
+    // Update the trials header button with badge/trial progress
+    updateTrialsButton() {
+        const trialsBtn = this.elements.trialsBtn;
+        if (!trialsBtn) return;
+        
+        const summary = this.game.getTrialSummary();
+        const cleared = summary.reduce((n, s) => n + s.clearedCount, 0);
+        const total = summary.reduce((n, s) => n + s.trials.length, 0);
+        const allDone = summary.every(s => s.allCleared);
+        
+        trialsBtn.textContent = allDone ? '🏆 Trials ⭐' : `🏆 Trials (${cleared}/${total})`;
+        trialsBtn.title = allDone
+            ? 'All Grand Trials complete — rematch any guardian!'
+            : `Grand Trial battles: ${cleared}/${total} trials cleared. Face the guardians!`;
     }
     
     // Update battle button appearance based on unlock status
@@ -407,8 +436,11 @@ class GameUI {
         if (!isPhrasePractice || (phraseProgress && phraseProgress.isLastCharacter)) {
             const trackerInfo = {
                 ...sessionStats,
+                // Pass the single-character STRING, not the Character object —
+                // the tracker keys its distinct set by string, and an object
+                // would collide to "[object Object]" (broke the 0/10 counter).
                 character: isPhrasePractice && phraseProgress && phraseProgress.phrase
-                    ? null : character,
+                    ? null : (character && typeof character.char === 'string' ? character.char : character),
                 phrase: isPhrasePractice && phraseProgress && phraseProgress.phrase
                     ? phraseProgress.phrase.text
                     : null,
@@ -974,7 +1006,7 @@ class GameUI {
         this.updateSelectedTeamCount();
     }
     
-    // Confirm team selection and start battle
+    // Confirm team selection and start battle (or a grand trial, if pending)
     confirmTeamSelection() {
         if (!this.teamSelectionState || this.teamSelectionState.selectedCharacters.length === 0) {
             this.showMessage('Please select at least one character!', 'error');
@@ -983,63 +1015,285 @@ class GameUI {
         
         // Store selected characters before hiding modal
         const selectedCharacters = this.teamSelectionState.selectedCharacters;
+        const pendingTrial = this.pendingTrial;
+        this.pendingTrial = null;
+        
+        // Restore the default button text for the next use of the modal
+        this.elements.startBattleBtn.textContent = 'Start Battle!';
         
         // Hide modal
         this.hideTeamSelectionModal();
         
-        // Start battle with selected team
-        this.initializeBattleWithTeam(selectedCharacters);
+        // Route: trial battle or regular wild battle
+        if (pendingTrial) {
+            this.beginTrialBattle(selectedCharacters, pendingTrial.setIdx, pendingTrial.trialIdx);
+        } else {
+            this.initializeBattleWithTeam(selectedCharacters);
+        }
     }
     
     // Hide team selection modal
     hideTeamSelectionModal() {
         this.elements.teamSelectionModal.classList.add('hidden');
         this.teamSelectionState = null;
+        // Drop any pending trial routing so a cancelled trial doesn't leak
+        // into the next time the modal is used for a wild battle.
+        this.pendingTrial = null;
+        this.elements.startBattleBtn.textContent = 'Start Battle!';
     }
     
-    // Initialize battle with selected team
-    initializeBattleWithTeam(selectedCharacters) {
-        // Initialize battle state - always reset HP and defeated status for new battles
+    // GRAND TRIALS UI -------------------------------------------------------
+
+    // Render the trials list: one card per set, trial rows showing status
+    // (locked / ready / cleared) and a "Face Trial N" button when it's the
+    // next one to beat. Sets unlock strictly in order.
+    refreshTrialsScreen() {
+        this.elements.trialsList.innerHTML = '';
+        const summary = this.game.getTrialSummary();
+        const battleLocked = this.practiceTracker.isBattleUnlocked();
+        
+        summary.forEach(s => {
+            const card = document.createElement('div');
+            card.className = `trial-set-card ${s.available ? '' : 'locked'} ${s.allCleared ? 'complete' : ''}`;
+            
+            const trialRows = s.trials.map(t => {
+                let statusIcon, statusText;
+                const isNext = !t.cleared && t.trialIdx === s.nextTrialIdx && s.available;
+                if (isNext) {
+                    statusIcon = '⚔️'; statusText = 'Up next';
+                } else if (t.cleared) {
+                    statusIcon = '✅'; statusText = t.wins > 1 ? `Cleared (${t.wins}x)` : 'Cleared';
+                } else if (!s.available) {
+                    statusIcon = '🔒'; statusText = 'Locked';
+                } else {
+                    statusIcon = '⬜'; statusText = 'Waiting';
+                }
+                // Completed trials can be re-fought at any time (rewards taper).
+                const rematchBtn = t.cleared && s.available
+                    ? `<button class="pixel-btn small-btn trial-rematch-btn" data-set="${s.setIdx}" data-trial="${t.trialIdx}">↻</button>`
+                    : '';
+                return `<div class="trial-row ${isNext ? 'is-next' : ''}">
+                    <span class="trial-row-icon">${statusIcon}</span>
+                    <span class="trial-row-name">Trial ${t.trialIdx + 1}: ${t.name}</span>
+                    <span class="trial-row-level">Lv ${t.level} × 6</span>
+                    <span class="trial-row-status">${statusText}</span>
+                    ${rematchBtn}
+                </div>`;
+            }).join('');
+            
+            let action = '';
+            if (s.available && s.nextTrialIdx !== null) {
+                action = `<button class="pixel-btn battle-btn trial-fight-btn" data-set="${s.setIdx}" data-trial="${s.nextTrialIdx}">⚔️ Face Trial ${s.nextTrialIdx + 1}</button>`;
+            }
+            
+            card.innerHTML = `
+                <div class="trial-set-header">
+                    <span class="trial-set-icon">${s.icon}</span>
+                    <div>
+                        <h3>${s.name}</h3>
+                        <p class="trial-set-intro">${s.intro}</p>
+                    </div>
+                    <span class="trial-set-badge">${s.allCleared ? s.badge : `${s.clearedCount}/5`}</span>
+                </div>
+                ${!s.available
+                    ? '<div class="trial-lock-note">🔒 Clear all 5 trials of the previous set to unlock this one.</div>'
+                    : ''}
+                <div class="trial-rows">${trialRows}</div>
+                <div class="trial-action">${action}</div>
+            `;
+            
+            this.elements.trialsList.appendChild(card);
+        });
+        
+        // Bind fight buttons (delegated per render)
+        this.elements.trialsList.querySelectorAll('.trial-fight-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const setIdx = parseInt(btn.dataset.set);
+                const trialIdx = parseInt(btn.dataset.trial);
+                if (!battleLocked) {
+                    const status = this.practiceTracker.getStatus();
+                    this.showMessage(
+                        `Battles are locked! Train ${status.practicesRemaining} more different character${status.practicesRemaining === 1 ? '' : 's'} first. (${status.practiceCount}/${status.practicesRequired})`,
+                        'info'
+                    );
+                    return;
+                }
+                this.startTrialBattle(setIdx, trialIdx);
+            });
+        });
+        
+        // Per-trial rematch buttons (cleared trials can be re-fought)
+        this.elements.trialsList.querySelectorAll('.trial-rematch-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const setIdx = parseInt(btn.dataset.set);
+                const trialIdx = parseInt(btn.dataset.trial);
+                if (!battleLocked) {
+                    const status = this.practiceTracker.getStatus();
+                    this.showMessage(
+                        `Battles are locked! Train ${status.practicesRemaining} more different character${status.practicesRemaining === 1 ? '' : 's'} first. (${status.practiceCount}/${status.practicesRequired})`,
+                        'info'
+                    );
+                    return;
+                }
+                this.startTrialBattle(setIdx, trialIdx);
+            });
+        });
+    }
+    
+    // Set up shared battle state for a battle (wild or trial).
+    // `enemyTeam` is an array of 1..6 battle-ready enemy objects. Wild
+    // battles pass a single-enemy team; trials pass 6 elite enemies.
+    setupBattleState(playerCharacters, enemyTeam, mode) {
         this.battleState = {
-            playerCharacters: selectedCharacters.map(char => ({
+            mode: mode, // 'wild' | 'trial'
+            setIdx: null,
+            trialIdx: null,
+            playerCharacters: playerCharacters.map(char => ({
                 ...char,
                 currentHP: char.hp, // Reset to full HP
                 defeated: false     // Reset defeated status
             })),
             currentPlayerCharacter: null,
-            enemy: null,
+            enemyTeam: enemyTeam,
             battleLog: []
         };
         
-        // Set first character as active
+        // Set first character and first enemy as active
         this.battleState.currentPlayerCharacter = this.battleState.playerCharacters[0];
+        if (this.battleState.enemyTeam.length > 0) {
+            this.battleState.currentEnemy = this.battleState.enemyTeam[0];
+        }
         
-        // Generate enemy
-        this.battleState.enemy = this.game.generateWildOpponent();
+        // Route victory/defeat handlers based on battle mode
+        this._onVictory = mode === 'trial' ? () => this.handleTrialVictory() : () => this.handleEnemyDefeated();
+        this._onDefeat = mode === 'trial' ? () => this.handleTrialDefeat() : () => this.handlePlayerDefeated();
+    }
+    
+    // Initialize battle with selected team (wild battle)
+    initializeBattleWithTeam(selectedCharacters) {
+        const enemy = this.game.generateWildOpponent();
+        this.setupBattleState(selectedCharacters, [enemy], 'wild');
         
         // Show battle screen and initialize
         this.showScreen('battle-screen');
         this.initializeBattleScreen();
     }
     
+    // Start a grand trial battle: pick the first uncleared trial of a set,
+    // validate prerequisites, then enter a 6v6 battle against the guardians.
+    startTrialBattle(setIdx, trialIdx) {
+        if (!this.game.isTrialSetAvailable(setIdx)) {
+            this.showMessage('Clear all trials in the previous set to unlock this one!', 'error');
+            return;
+        }
+        
+        const availableCharacters = this.game.getAvailableCharacters().filter(c => !c.isPhraseCharacter);
+        if (availableCharacters.length === 0) {
+            this.showMessage('You need at least one character to enter a Grand Trial!', 'error');
+            return;
+        }
+        
+        // Reuse the team selection modal, routing the confirm through pendingTrial
+        const MAX_TRIAL_TEAM_SIZE = 6;
+        // Sort strongest-first so the kid's best options are at the top
+        const sorted = availableCharacters.slice().sort((a, b) => {
+            const pa = (a.hp || 0) + (a.attack || 0) + (a.defense || 0) + (a.level || 1) * 10;
+            const pb = (b.hp || 0) + (b.attack || 0) + (b.defense || 0) + (b.level || 1) * 10;
+            return pb - pa;
+        });
+        this.teamSelectionState = {
+            availableCharacters: sorted,
+            selectedCharacters: [],
+            maxTeamSize: MAX_TRIAL_TEAM_SIZE
+        };
+        
+        this.populateAvailableCharactersList();
+        this.elements.selectedTeamList.innerHTML = '';
+        this.updateSelectedTeamCount();
+        this.elements.startBattleBtn.textContent = 'Enter Trial!';
+        
+        // Store the trial so the confirm handler can route correctly
+        this.pendingTrial = { setIdx: setIdx, trialIdx: trialIdx };
+        
+        this.elements.teamSelectionModal.classList.remove('hidden');
+        if (!this.teamSelectionEventsBound) {
+            this.bindTeamSelectionEvents();
+            this.teamSelectionEventsBound = true;
+        }
+    }
+    
+    // Begin a trial battle (called from the team selection confirm).
+    beginTrialBattle(selectedCharacters, setIdx, trialIdx) {
+        const enemyTeam = this.game.buildTrialEnemyTeam(setIdx, trialIdx);
+        if (enemyTeam.length === 0) {
+            this.showMessage('You need at least one trained character to start this trial!', 'error');
+            return;
+        }
+        
+        const set = GRAND_TRIAL_SETS[setIdx];
+        const trial = set.trials[trialIdx];
+        this.setupBattleState(selectedCharacters, enemyTeam, 'trial');
+        this.battleState.setIdx = setIdx;
+        this.battleState.trialIdx = trialIdx;
+        
+        this.showScreen('battle-screen');
+        this.initializeBattleScreen();
+        this.addBattleMessage(`🛡️ Guardian ${trial.name} leads the trial team (Lv ${trial.level})!`, 'info');
+    }
+    
     // Initialize battle screen UI
     initializeBattleScreen() {
+        const isTrial = this.battleState.mode === 'trial';
+        
         // Reset attack button state and text for new battle
         this.elements.attackBtn.disabled = false;
         this.elements.attackBtn.textContent = 'Attack!';
-        this.elements.findOpponentBtn.disabled = false;
+        this.elements.findOpponentBtn.disabled = isTrial;
+        this.elements.findOpponentBtn.style.display = isTrial ? 'none' : '';
+        
+        // Back button label + enemy side title: wild single vs guardian team
+        const backBtn = document.getElementById('battle-back-btn');
+        if (backBtn) {
+            backBtn.textContent = isTrial ? '← Back to Trials' : '← Back to Practice';
+        }
+        if (this.elements.enemySideTitle) {
+            this.elements.enemySideTitle.textContent = isTrial
+                ? `Guardians (Lv ${this.battleState.currentEnemy ? this.battleState.currentEnemy.level : ''})`
+                : 'Wild Character';
+        }
         
         // Setup event listeners for battle
         this.setupBattleEvents();
         
         // Render battle participants
         this.renderBattleCharacter(this.battleState.currentPlayerCharacter, 'player');
-        this.renderBattleCharacter(this.battleState.enemy, 'enemy');
+        this.renderBattleCharacter(this.battleState.currentEnemy, 'enemy');
+        this.renderEnemyTeam(isTrial);
         this.renderPlayerTeam();
         
         // Clear battle log
         this.battleState.battleLog = [];
-        this.addBattleMessage(`A wild ${this.battleState.enemy.name} appears!`, 'info');
+        if (!isTrial) {
+            this.addBattleMessage(`A wild ${this.battleState.currentEnemy.name} appears!`, 'info');
+        }
+    }
+    
+    // Render the enemy team panel (trials only; hidden for wild battles)
+    renderEnemyTeam(isTrial) {
+        if (!this.elements.enemyTeam) return;
+        if (!isTrial) {
+            this.elements.enemyTeam.innerHTML = '';
+            return;
+        }
+        
+        this.elements.enemyTeam.innerHTML = '';
+        this.battleState.enemyTeam.forEach(enemy => {
+            const chip = document.createElement('div');
+            chip.className = `team-character trial-enemy ${enemy.currentHP <= 0 ? 'defeated' : ''}`;
+            chip.textContent = enemy.name;
+            chip.title = `${enemy.name} — ${enemy.currentHP}/${enemy.maxHP} HP`;
+            this.elements.enemyTeam.appendChild(chip);
+        });
     }
     
     // Setup battle event listeners
@@ -1052,7 +1306,8 @@ class GameUI {
         // Add event listeners
         this.handleAttack = () => this.executeAttack();
         this.findNewOpponent = () => this.generateNewEnemy();
-        this.exitBattle = () => this.showScreen('character-select');
+        // Back button returns to the Trials screen for trial battles
+        this.exitBattle = () => this.showScreen(this.battleState && this.battleState.mode === 'trial' ? 'trials-screen' : 'character-select');
         
         this.elements.attackBtn.addEventListener('click', this.handleAttack);
         this.elements.findOpponentBtn.addEventListener('click', this.findNewOpponent);
@@ -1127,10 +1382,10 @@ class GameUI {
     
     // Execute attack action
     executeAttack() {
-        if (!this.battleState.currentPlayerCharacter || !this.battleState.enemy) return;
+        if (!this.battleState.currentPlayerCharacter || !this.battleState.currentEnemy) return;
         
         const player = this.battleState.currentPlayerCharacter;
-        const enemy = this.battleState.enemy;
+        const enemy = this.battleState.currentEnemy;
         
         // Disable attack button during animation
         this.elements.attackBtn.disabled = true;
@@ -1145,12 +1400,13 @@ class GameUI {
             this.elements.enemyBattleCharacter.classList.remove('hit-animation');
         }, 500);
         
-        // Update enemy display
+        // Update enemy display + trial team panel
         this.renderBattleCharacter(enemy, 'enemy');
+        this.renderEnemyTeam(this.battleState.mode === 'trial');
         
         if (attackResult.enemyDefeated) {
             // Enemy defeated!
-            setTimeout(() => this.handleEnemyDefeated(), 1000);
+            setTimeout(() => this.advanceAfterEnemyDefeated(), 1000);
             return;
         }
         
@@ -1175,7 +1431,7 @@ class GameUI {
                 
                 if (player.currentHP === 0) {
                     // Player character defeated
-                    setTimeout(() => this.handlePlayerCharacterDefeated(), 1000);
+                    setTimeout(() => this.handlePlayerDefeated(), 1000);
                     return;
                 }
             }
@@ -1194,9 +1450,27 @@ class GameUI {
         return real || fighter;
     }
     
+    // A single enemy fainted — either advance to the next guardian (trial)
+    // or resolve a wild battle victory.
+    advanceAfterEnemyDefeated() {
+        if (this.battleState.mode === 'trial') {
+            const next = (this.battleState.enemyTeam || []).find(e => e.currentHP > 0);
+            if (next) {
+                this.battleState.currentEnemy = next;
+                this.renderBattleCharacter(next, 'enemy');
+                this.addBattleMessage(`Guardian ${next.name} steps forward!`, 'info');
+                this.elements.attackBtn.disabled = false;
+                return;
+            }
+            setTimeout(() => this.handleTrialVictory(), 700);
+            return;
+        }
+        this.handleEnemyDefeated();
+    }
+    
     // Handle enemy defeated
     handleEnemyDefeated() {
-        const enemy = this.battleState.enemy;
+        const enemy = this.battleState.enemy || this.battleState.currentEnemy;
         const fighter = this.resolveFighterCharacter(this.battleState.currentPlayerCharacter);
         this.addBattleMessage(`${enemy.name} is defeated!`, 'victory');
         
@@ -1252,7 +1526,7 @@ class GameUI {
     }
     
     // Handle player character defeated
-    handlePlayerCharacterDefeated() {
+    handlePlayerDefeated() {
         const player = this.battleState.currentPlayerCharacter;
         player.defeated = true;
         this.addBattleMessage(`${player.char} is defeated!`, 'defeat');
@@ -1261,27 +1535,108 @@ class GameUI {
         const remainingCharacters = this.battleState.playerCharacters.filter(char => !char.defeated);
         
         if (remainingCharacters.length === 0) {
-            // All characters defeated - record battle usage to lock battles again
-            const battleLockResult = this.practiceTracker.recordBattleUsed();
-            this.addBattleMessage(battleLockResult.message, 'info');
-            
-            this.addBattleMessage('All your characters are defeated! Returning to practice...', 'defeat');
-            setTimeout(() => {
-                this.showScreen('character-select');
-                this.showMessage('Your characters need more training! Practice to get stronger!', 'info');
-            }, 3000);
-        } else {
-            // Switch to next available character
-            this.battleState.currentPlayerCharacter = remainingCharacters[0];
-            this.renderBattleCharacter(this.battleState.currentPlayerCharacter, 'player');
-            this.renderPlayerTeam();
-            this.addBattleMessage(`Switched to ${this.battleState.currentPlayerCharacter.char}!`, 'info');
-            this.elements.attackBtn.disabled = false;
+            if (this.battleState.mode === 'trial') {
+                this.handleTrialDefeat();
+            } else {
+                this.handleWildDefeat();
+            }
+            return;
         }
+        
+        // Switch to next available character (auto-rotation)
+        this.battleState.currentPlayerCharacter = remainingCharacters[0];
+        this.renderBattleCharacter(this.battleState.currentPlayerCharacter, 'player');
+        this.renderPlayerTeam();
+        this.addBattleMessage(`Switched to ${this.battleState.currentPlayerCharacter.char}!`, 'info');
+        this.elements.attackBtn.disabled = false;
+    }
+    
+    // Wild battle full-defeat path (keeps the original lock-on-lose behavior)
+    handleWildDefeat() {
+        const battleLockResult = this.practiceTracker.recordBattleUsed();
+        this.addBattleMessage(battleLockResult.message, 'info');
+        
+        this.addBattleMessage('All your characters are defeated! Returning to practice...', 'defeat');
+        setTimeout(() => {
+            this.showScreen('character-select');
+            this.showMessage('Your characters need more training! Practice to get stronger!', 'info');
+        }, 3000);
+    }
+    
+    // TRIAL BATTLE RESULTS --------------------------------------------------
+
+    // All guardians defeated — award rewards, record progress, and note whether
+    // the whole set just got cleared (badge earned!).
+    handleTrialVictory() {
+        const setIdx = this.battleState.setIdx;
+        const trialIdx = this.battleState.trialIdx;
+        const set = GRAND_TRIAL_SETS[setIdx];
+        const trial = set.trials[trialIdx];
+        
+        this.addBattleMessage(`✨ All guardians defeated! You cleared ${trial.name}'s trial!`, 'victory');
+        
+        const result = this.game.recordTrialResult(setIdx, trialIdx, true);
+        if (result.xp) {
+            this.addBattleMessage(`🏆 Trial complete: +${result.xp} XP!${result.firstWin ? '' : ' (re-fight bonus)'}`, 'loot');
+        }
+        if (result.itemId) {
+            const bagItems = this.game.getBagItems();
+            const itemInfo = bagItems.find(i => i.id === result.itemId);
+            this.addBattleMessage(`🎁 Prize: ${itemInfo ? itemInfo.name : result.itemId}!`, 'loot');
+        }
+        
+        const summary = this.game.getTrialSummary()[setIdx];
+        if (summary.allCleared) {
+            this.addBattleMessage(`🎉 ${set.badge} earned — ${set.name} complete!`, 'victory');
+        } else if (summary.nextTrialIdx !== null) {
+            this.addBattleMessage(`Next up: Trial ${summary.nextTrialIdx + 1} of ${set.name} awaits...`, 'info');
+        }
+        
+        if (result.playerLeveledUp) {
+            this.addBattleMessage('✨ Your trainer level went up!', 'victory');
+        }
+        
+        this.game.saveGame();
+        this.updateHeaderStats();
+        
+        this.elements.attackBtn.disabled = true;
+        this.elements.attackBtn.textContent = 'Victory!';
+        setTimeout(() => {
+            this.showScreen('trials-screen');
+            const setSummary = this.game.getTrialSummary()[setIdx];
+            if (setSummary.allCleared) {
+                this.showMessage(`🏆 ${set.name} complete! You earned ${set.badge}!`, 'success');
+            } else {
+                const remaining = 5 - setSummary.clearedCount;
+                this.showMessage(`Trial cleared! ${remaining} trial${remaining === 1 ? '' : 's'} left in ${set.name}.`, 'success');
+            }
+        }, 3500);
+    }
+    
+    // All your characters fainted in a trial — no progress change.
+    handleTrialDefeat() {
+        const set = GRAND_TRIAL_SETS[this.battleState.setIdx];
+        if (set) {
+            this.addBattleMessage(`🛡️ The guardians of ${set.name} were too strong...`, 'defeat');
+            this.addBattleMessage('Train your characters to higher levels and come back!', 'info');
+        }
+        
+        this.game.saveGame();
+        this.updateHeaderStats();
+        this.elements.attackBtn.disabled = true;
+        setTimeout(() => {
+            this.showScreen('trials-screen');
+            this.showMessage('Trial failed! Train your characters and try again.', 'info');
+        }, 3000);
     }
     
     // Generate new enemy during active battle
     generateNewEnemy() {
+        // Trial battles have a fixed guardian team — no swapping enemies in.
+        if (this.battleState && this.battleState.mode === 'trial') {
+            this.addBattleMessage('Trial teams are fixed — face what the guardian brings!', 'info');
+            return;
+        }
         // Only allow finding new opponents during active battle (not after victory/defeat)
         if (!this.battleState || !this.battleState.currentPlayerCharacter || 
             this.battleState.currentPlayerCharacter.defeated ||

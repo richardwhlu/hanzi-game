@@ -45,6 +45,7 @@
             <div class="game-controls">
                 <button id="items-btn" class="pixel-btn items-btn" title="View and use items">🎒 Items</button>
                 <button id="battle-btn" class="pixel-btn battle-btn" title="Battle wild characters and phrases!">⚔️ Battle</button>
+                <button id="trials-btn" class="pixel-btn trials-btn" title="Grand Trial battles — 6v6 boss fights to earn badges!">🏆 Trials</button>
                 
                 <!-- File Operations Dropdown -->
                 <div class="dropdown">
@@ -212,9 +213,12 @@
 
                     <!-- Enemy side -->
                     <div class="battle-side enemy-side">
-                        <h3>Wild Character</h3>
+                        <h3 id="enemy-side-title">Wild Character</h3>
                         <div id="enemy-character" class="battle-character">
                             <!-- Enemy character will be displayed here -->
+                        </div>
+                        <div id="enemy-team" class="character-team">
+                            <!-- Trial enemy team will be displayed here -->
                         </div>
                     </div>
                 </div>
@@ -232,6 +236,18 @@
                     <button id="battle-back-btn" class="pixel-btn">← Back to Practice</button>
                     <button id="find-opponent-btn" class="pixel-btn">Find New Opponent</button>
                 </div>
+            </div>
+
+            <!-- Grand Trials screen -->
+            <div id="trials-screen" class="screen">
+                <div class="trials-header">
+                    <h2>🏆 Grand Trials</h2>
+                    <p class="trials-subtitle">Face the guardians of each trial! Every battle is 6v6 against elite versions of characters at a fixed level. Clear all 5 trials of a set to earn the badge and unlock the next set.</p>
+                </div>
+                <div id="trials-list" class="trials-list">
+                    <!-- Trial sets will appear here -->
+                </div>
+                <button id="trials-back-btn" class="pixel-btn">← Back to Game</button>
             </div>
 
             <!-- Instructions screen -->
@@ -294,6 +310,17 @@
                             <li><strong>Attack enemies</strong> and switch between team members</li>
                             <li><strong>Defeat opponents</strong> to capture new characters and find items</li>
                             <li><strong>Battle completion</strong> locks battles until you practice 10 more times</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-section">
+                        <h3>🏆 Grand Trials</h3>
+                        <ul>
+                            <li><strong>Face the guardians</strong> — each trial is a <strong>6v6 battle</strong> against elite versions of characters at a fixed level</li>
+                            <li><strong>Cleared in order</strong>: 5 trials per set, and clearing all 5 earns the set's <strong>badge</strong> and unlocks the next set</li>
+                            <li><strong>Winnable by design:</strong> Trial 1 is easy; the later trials need your strongest characters <em>fully trained</em> (level 7–10)</li>
+                            <li><strong>Rewards:</strong> big XP and guaranteed item prizes — cleared trials can be rematched for slightly less XP</li>
+                            <li><strong>Beaten? No shame!</strong> Trials never capture characters and never lock you out — just train a little more and return</li>
                         </ul>
                     </div>
 
@@ -472,6 +499,7 @@
     <script src="game-data.js"></script>
     <script src="data-manager.js"></script>
     <script src="game-engine.js"></script>
+    <script src="grand-trials.js"></script>
     <script src="game-ui.js"></script>
     <script src="main.js"></script>
 </body>
