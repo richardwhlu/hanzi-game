@@ -197,6 +197,7 @@ class GameUI {
                 break;
             case 'manage-screen':
                 this.refreshManageGrid();
+                this.refreshPacksList();
                 break;
             case 'evolution-screen':
                 this.refreshPhraseGrid();
@@ -1113,7 +1114,7 @@ class GameUI {
                 if (!battleLocked) {
                     const status = this.practiceTracker.getStatus();
                     this.showMessage(
-                        `Battles are locked! Train ${status.practicesRemaining} more different character${status.practicesRemaining === 1 ? '' : 's'} first. (${status.practiceCount}/${status.practicesRequired})`,
+                        `Battles are locked! Train ${status.practicesRemaining} more different character${status.practicesRemaining === 1 ? '' : 's'} first. (${status.distinctTrained !== undefined ? status.distinctTrained : status.practiceCount}/${status.practicesRequired} this round)`,
                         'info'
                     );
                     return;
@@ -1130,7 +1131,7 @@ class GameUI {
                 if (!battleLocked) {
                     const status = this.practiceTracker.getStatus();
                     this.showMessage(
-                        `Battles are locked! Train ${status.practicesRemaining} more different character${status.practicesRemaining === 1 ? '' : 's'} first. (${status.practiceCount}/${status.practicesRequired})`,
+                        `Battles are locked! Train ${status.practicesRemaining} more different character${status.practicesRemaining === 1 ? '' : 's'} first. (${status.distinctTrained !== undefined ? status.distinctTrained : status.practiceCount}/${status.practicesRequired} this round)`,
                         'info'
                     );
                     return;
@@ -1910,6 +1911,7 @@ class GameUI {
         
         // Initialize data status display
         this.updateDataStatus();
+        this.refreshPacksList();
     }
     
     // Handle file uploads
@@ -1975,6 +1977,95 @@ class GameUI {
         });
     }
     
+    // ---------------- Pre-loaded Character Packs ----------------
+
+    // Render the available pack list (from vocabulary_packs/packs.json).
+    // Degrades gracefully if the site isn't served over http(s).
+    async refreshPacksList() {
+        const listEl = document.getElementById('packs-list');
+        if (!listEl) return;
+
+        let packs = null;
+        try {
+            packs = await this.game.dataManager.loadPacks();
+        } catch (error) {
+            listEl.innerHTML = '<p class="packs-error">Could not load character packs.</p>';
+            return;
+        }
+
+        if (!packs || packs.length === 0) {
+            listEl.innerHTML =
+                '<p class="packs-empty">No character packs available yet. ' +
+                'You can still upload your own JSON data below.</p>';
+            return;
+        }
+
+        const activeId = this.game.dataManager.customPackId;
+        listEl.innerHTML = packs.map(p => {
+            const gradeLabel = (p.grade != null)
+                ? `Grade ${p.grade} · Lesson ${p.lesson != null ? p.lesson : '—'}`
+                : '';
+            const isActive = activeId && activeId === p.id;
+            return `
+                <div class="pack-row${isActive ? ' active' : ''}" data-pack-id="${p.id}">
+                    <div class="pack-info">
+                        <span class="pack-name">${p.name}</span>
+                        <span class="pack-meta">${[gradeLabel,
+                            p.characters != null ? p.characters + ' characters' : null,
+                            p.phrases != null ? p.phrases + ' phrases' : null
+                        ].filter(Boolean).join(' · ')}</span>
+                    </div>
+                    <button class="pixel-btn pack-load-btn${isActive ? ' active' : ''}"
+                            data-pack-id="${p.id}" ${isActive ? 'disabled' : ''}>
+                        ${isActive ? '✓ Loaded' : '📥 Load'}
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        listEl.querySelectorAll('.pack-load-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.loadPack(btn.dataset.packId));
+        });
+    }
+
+    // Load a pre-loaded pack as the active dataset
+    async loadPack(id) {
+        const meta = this.game.dataManager.getPackMeta(id);
+        const name = (meta && meta.name) || id;
+
+        const confirmed = confirm(
+            `⚠️ Loading the pack "${name}" will OVERWRITE all current progress!\n\n` +
+            '• Deletes ALL character progress and levels\n' +
+            '• Deletes ALL phrase unlocks and progress\n' +
+            '• Resets player level and items\n' +
+            '• Locks battles again (train 10 different characters to unlock)\n\n' +
+            'Export your progress first (File → Export) if you want to keep it.\n\n' +
+            `Load "${name}"?`
+        );
+        if (!confirmed) return;
+
+        const btns = document.querySelectorAll(`.pack-load-btn[data-pack-id="${id}"]`);
+        btns.forEach(b => { b.disabled = true; b.textContent = 'Loading…'; });
+
+        const result = await this.game.loadCharacterPack(id);
+        btns.forEach(b => {
+            b.disabled = false;
+            b.textContent = '📥 Load';
+        });
+
+        if (result.success) {
+            this.showMessage(result.message, 'success');
+            // Reset practice tracker so the locked-battle counter is fair for the new set
+            this.practiceTracker.resetToDefaults();
+            this.updateDataStatus();
+            this.showScreen('character-select');
+            this.refreshCharacterGrid();
+            this.updateHeaderStats();
+        } else {
+            this.showMessage(result.message, 'error');
+        }
+    }
+
     // Switch to built-in data
     switchToBuiltinData() {
         try {
@@ -2054,12 +2145,16 @@ class GameUI {
         }
     }
     
-    // Update data status display
+// Update data status display
     updateDataStatus() {
         const stats = this.game.dataManager.getDataStats();
         
         // Update current data source
-        this.elements.currentDataSource.textContent = stats.currentSource === 'built-in' ? 'Built-in' : 'Custom';
+        const packName = this.game.dataManager.customPackName;
+        const sourceLabel = stats.currentSource === 'custom'
+            ? (packName ? `Character Pack — ${packName}` : 'Custom')
+            : 'Built-in';
+        this.elements.currentDataSource.textContent = sourceLabel;
         
         // Update character and phrase counts
         if (stats.currentSource === 'custom') {

@@ -456,8 +456,72 @@ body {
     border: 2px solid #FFED4A;
     font-weight: bold;
 }
+// Character Packs (pre-loaded workbook chapters)
+.packs-intro {
+    margin: 4px 0 12px;
+    color: var(--gbc-dark-green);
+    font-size: 0.95rem;
+}
 
-.character-card.max-level .character-level::after {
+.packs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pack-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 2px solid var(--gbc-dark-green);
+    border-radius: 6px;
+    background: var(--gbc-lightest, #eaf5d9);
+}
+
+.pack-row.active {
+    border-style: double;
+    border-width: 4px;
+    background: #fffbe0;
+}
+
+.pack-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pack-name {
+    font-weight: bold;
+    color: var(--gbc-dark-green);
+}
+
+.pack-meta {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.pack-load-btn {
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+
+.pack-load-btn.active {
+    background: #b8e0a2;
+}
+
+.packs-loading,
+.packs-empty,
+.packs-error {
+    color: #555;
+    margin: 0;
+}
+
+.packs-error {
+    color: #a33;
+}
     content: " ⭐";
     color: #FFED4A;
     text-shadow: 1px 1px 0 #B8860B;

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "family-vocabulary",
+    "file": "family-vocabulary.json",
+    "name": "Family Vocabulary 家庭",
+    "grade": 3,
+    "lesson": 1,
+    "characters": 24,
+    "phrases": 16
+  },
+  {
+    "id": "ap-chinese-level1-vocab",
+    "file": "ap-chinese-level1-vocab.json",
+    "name": "AP Chinese Level 1",
+    "grade": 1,
+    "lesson": 1,
+    "characters": 197,
+    "phrases": 59
+  }
+]

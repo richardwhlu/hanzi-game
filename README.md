@@ -62,6 +62,19 @@ Easily add characters from your textbooks:
 3. The game automatically determines stats or uses defaults
 4. New phrase combinations may unlock automatically
 
+### 📖 Pre-loaded Character Packs
+
+Self-contained word sets (one workbook chapter per file) ship in
+`vocabulary_packs/`. Each pack is the same `{ characters, phrases }` shape as
+an upload, plus optional metadata (`name`, `grade`, `lesson`). A manifest at
+`vocabulary_packs/packs.json` drives the picker.
+
+- Add a new pack: drop `<id>.json` in `vocabulary_packs/` and add an entry
+  to `packs.json` (`id`, `file`, `name`, `grade`, `lesson`, counts).
+- In the game: **Settings → Manage Data → Character Packs → Load**.
+- Packs reuse the upload pipeline, so validation, saving, and offline
+  playback all work the same as user-uploaded data.
+
 ## Technical Details
 
 - **Frontend**: Vanilla HTML/CSS/JavaScript (lightweight, no dependencies)

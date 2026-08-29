@@ -1,0 +1,378 @@
+{
+  "name": "Family Vocabulary",
+  "sourceId": "family_vocabulary",
+  "grade": 3,
+  "lesson": 1,
+  "characters": {
+    "家": {
+      "pinyin": "jiā",
+      "strokes": 10,
+      "difficulty": 3,
+      "frequency": 98
+    },
+    "庭": {
+      "pinyin": "tíng",
+      "strokes": 10,
+      "difficulty": 3,
+      "frequency": 50
+    },
+    "爺": {
+      "pinyin": "yé",
+      "strokes": 13,
+      "difficulty": 4,
+      "frequency": 88
+    },
+    "奶": {
+      "pinyin": "nǎi",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 90
+    },
+    "外": {
+      "pinyin": "wài",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 85
+    },
+    "公": {
+      "pinyin": "gōng",
+      "strokes": 4,
+      "difficulty": 1,
+      "frequency": 75
+    },
+    "婆": {
+      "pinyin": "pó",
+      "strokes": 11,
+      "difficulty": 3,
+      "frequency": 78
+    },
+    "伯": {
+      "pinyin": "bó",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 60
+    },
+    "叔": {
+      "pinyin": "shú",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 70
+    },
+    "姑": {
+      "pinyin": "gū",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 65
+    },
+    "舅": {
+      "pinyin": "jiù",
+      "strokes": 13,
+      "difficulty": 4,
+      "frequency": 40
+    },
+    "姨": {
+      "pinyin": "yí",
+      "strokes": 9,
+      "difficulty": 3,
+      "frequency": 55
+    },
+    "媽": {
+      "pinyin": "mā",
+      "strokes": 13,
+      "difficulty": 4,
+      "frequency": 95
+    },
+    "堂": {
+      "pinyin": "táng",
+      "strokes": 11,
+      "difficulty": 3,
+      "frequency": 45
+    },
+    "哥": {
+      "pinyin": "gē",
+      "strokes": 10,
+      "difficulty": 3,
+      "frequency": 85
+    },
+    "表": {
+      "pinyin": "biǎo",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 60
+    },
+    "姊": {
+      "pinyin": "jiě",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 70
+    },
+    "女": {
+      "pinyin": "nǚ",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 90
+    },
+    "兒": {
+      "pinyin": "ér",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 80
+    },
+    "孫": {
+      "pinyin": "sūn",
+      "strokes": 10,
+      "difficulty": 3,
+      "frequency": 55
+    },
+    "子": {
+      "pinyin": "zi",
+      "strokes": 3,
+      "difficulty": 1,
+      "frequency": 95
+    },
+    "兄": {
+      "pinyin": "xiōng",
+      "strokes": 5,
+      "difficulty": 1,
+      "frequency": 50
+    },
+    "弟": {
+      "pinyin": "dì",
+      "strokes": 7,
+      "difficulty": 2,
+      "frequency": 80
+    },
+    "妹": {
+      "pinyin": "mèi",
+      "strokes": 8,
+      "difficulty": 2,
+      "frequency": 82
+    }
+  },
+  "phrases": {
+    "家庭": {
+      "characters": [
+        "家",
+        "庭"
+      ],
+      "requirements": {
+        "家": 2,
+        "庭": 2
+      },
+      "difficulty": 3,
+      "frequency": 95,
+      "pinyin": "jiā tíng",
+      "meaning": "family, household"
+    },
+    "爺爺": {
+      "characters": [
+        "爺",
+        "爺"
+      ],
+      "requirements": {
+        "爺": 2
+      },
+      "difficulty": 4,
+      "frequency": 90,
+      "pinyin": "yé ye",
+      "meaning": "Dad's dad (paternal grandfather)"
+    },
+    "奶奶": {
+      "characters": [
+        "奶",
+        "奶"
+      ],
+      "requirements": {
+        "奶": 1
+      },
+      "difficulty": 1,
+      "frequency": 92,
+      "pinyin": "nǎi nai",
+      "meaning": "Dad's mom (paternal grandmother)"
+    },
+    "外公": {
+      "characters": [
+        "外",
+        "公"
+      ],
+      "requirements": {
+        "外": 1,
+        "公": 1
+      },
+      "difficulty": 1,
+      "frequency": 88,
+      "pinyin": "wài gōng",
+      "meaning": "Mom's dad (maternal grandfather)"
+    },
+    "外婆": {
+      "characters": [
+        "外",
+        "婆"
+      ],
+      "requirements": {
+        "外": 1,
+        "婆": 2
+      },
+      "difficulty": 3,
+      "frequency": 88,
+      "pinyin": "wài pó",
+      "meaning": "Mom's mom (maternal grandmother)"
+    },
+    "伯伯": {
+      "characters": [
+        "伯",
+        "伯"
+      ],
+      "requirements": {
+        "伯": 1
+      },
+      "difficulty": 2,
+      "frequency": 65,
+      "pinyin": "bó bo",
+      "meaning": "father's elder brother, paternal uncle"
+    },
+    "叔叔": {
+      "characters": [
+        "叔",
+        "叔"
+      ],
+      "requirements": {
+        "叔": 1
+      },
+      "difficulty": 2,
+      "frequency": 75,
+      "pinyin": "shú shu",
+      "meaning": "father's younger brother, paternal uncle"
+    },
+    "姑姑": {
+      "characters": [
+        "姑",
+        "姑"
+      ],
+      "requirements": {
+        "姑": 1
+      },
+      "difficulty": 2,
+      "frequency": 70,
+      "pinyin": "gū gu",
+      "meaning": "father's sister, paternal aunt"
+    },
+    "舅舅": {
+      "characters": [
+        "舅",
+        "舅"
+      ],
+      "requirements": {
+        "舅": 2
+      },
+      "difficulty": 4,
+      "frequency": 60,
+      "pinyin": "jiù jiu",
+      "meaning": "mother's brother, maternal uncle"
+    },
+    "姨媽": {
+      "characters": [
+        "姨",
+        "媽"
+      ],
+      "requirements": {
+        "姨": 2,
+        "媽": 1
+      },
+      "difficulty": 4,
+      "frequency": 55,
+      "pinyin": "yí mā",
+      "meaning": "mother's sister, maternal aunt"
+    },
+    "堂哥": {
+      "characters": [
+        "堂",
+        "哥"
+      ],
+      "requirements": {
+        "堂": 2,
+        "哥": 1
+      },
+      "difficulty": 3,
+      "frequency": 50,
+      "pinyin": "táng gē",
+      "meaning": "paternal uncle's son who is older than me"
+    },
+    "表姊": {
+      "characters": [
+        "表",
+        "姊"
+      ],
+      "requirements": {
+        "表": 2,
+        "姊": 1
+      },
+      "difficulty": 3,
+      "frequency": 45,
+      "pinyin": "biǎo jiě",
+      "meaning": "paternal aunt's/maternal side's daughter older than me"
+    },
+    "女兒": {
+      "characters": [
+        "女",
+        "兒"
+      ],
+      "requirements": {
+        "女": 1,
+        "兒": 2
+      },
+      "difficulty": 2,
+      "frequency": 90,
+      "pinyin": "nǚ ér",
+      "meaning": "daughter"
+    },
+    "孫子": {
+      "characters": [
+        "孫",
+        "子"
+      ],
+      "requirements": {
+        "孫": 2,
+        "子": 1
+      },
+      "difficulty": 3,
+      "frequency": 60,
+      "pinyin": "sūn zi",
+      "meaning": "grandson, son's son"
+    },
+    "外孫女": {
+      "characters": [
+        "外",
+        "孫",
+        "女"
+      ],
+      "requirements": {
+        "外": 1,
+        "孫": 2,
+        "女": 1
+      },
+      "difficulty": 3,
+      "frequency": 50,
+      "pinyin": "wài sūn nǚ",
+      "meaning": "granddaughter for maternal side family"
+    },
+    "兄弟姊妹": {
+      "characters": [
+        "兄",
+        "弟",
+        "姊",
+        "妹"
+      ],
+      "requirements": {
+        "兄": 1,
+        "弟": 1,
+        "姊": 1,
+        "妹": 1
+      },
+      "difficulty": 2,
+      "frequency": 85,
+      "pinyin": "xiōng dì jiě mèi",
+      "meaning": "brothers and sisters"
+    }
+  }
+}

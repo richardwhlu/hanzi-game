@@ -1,4 +1,8 @@
 {
+  "name": "AP Chinese Level 1 Vocab",
+  "sourceId": "ap-chinese-level1-vocab",
+  "grade": 1,
+  "lesson": 1,
   "characters": {
     "你": {
       "pinyin": "nǐ",
@@ -1020,12 +1024,6 @@
       "difficulty": 2,
       "frequency": 77
     },
-    "校": {
-      "pinyin": "xiào",
-      "strokes": 10,
-      "difficulty": 2,
-      "frequency": 88
-    },
     "習": {
       "pinyin": "xí",
       "strokes": 11,
@@ -1187,12 +1185,6 @@
       "strokes": 5,
       "difficulty": 1,
       "frequency": 88
-    },
-    "習": {
-      "pinyin": "xí",
-      "strokes": 11,
-      "difficulty": 2,
-      "frequency": 85
     }
   },
   "phrases": {

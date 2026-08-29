@@ -1,6 +1,48 @@
 // Core game engine that handles game logic and hanzi-writer integration
 
 class HanziGame {
+    // Load a pre-loaded character pack (workbook chapter). Fetches it,
+    // validates it, and makes it the active dataset — the same code paths
+    // an upload would take. Returns { success, message } like the other
+    // import methods so the UI can report the outcome uniformly.
+    async loadCharacterPack(id) {
+        try {
+            // Ensure the manifest is loaded (UI usually preloads it, but the
+            // engine shouldn't depend on that).
+            if (!this.dataManager.getPackMeta(id)) {
+                await this.dataManager.loadPacks();
+            }
+            const data = await this.dataManager.fetchPack(id);
+            const meta = this.dataManager.getPackMeta(id);
+            this.dataManager.importPack(data, meta);
+
+            // Adopt the pack as a fresh set: replace all characters and
+            // phrases with the pack's, dropping progress on other sets.
+            for (const k of Object.keys(this.characters)) delete this.characters[k];
+            for (const k of Object.keys(this.phrases)) delete this.phrases[k];
+            const activeData = this.dataManager.getActiveCharacterData();
+            for (const [char, charData] of Object.entries(activeData)) {
+                this.characters[char] = new Character(char, charData);
+            }
+            this.player.totalCharacters = Object.keys(this.characters).length;
+            this.initializePhrases();
+            this.checkForNewUnlocks();
+            this.saveGame();
+
+            const name = (meta && meta.name) || id;
+            const label = (meta && meta.grade != null)
+                ? ` (Grade ${meta.grade}, Lesson ${meta.lesson})` : '';
+            return {
+                success: true,
+                message: `Loaded pack "${name}"${label}: ${Object.keys(this.characters).length} characters, ` +
+                         `${Object.keys(this.phrases).length} phrases.`
+            };
+        } catch (error) {
+            console.error('Failed to load character pack:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
     constructor() {
         this.player = null;
         this.characters = {};

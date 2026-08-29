@@ -6,7 +6,115 @@ class DataManager {
         this.customCharacters = {};
         this.customPhrases = {};
         this.dataSource = 'built-in'; // 'built-in' or 'custom'
+
+        // Pre-loaded character packs (workbook chapters, e.g. "Grade 3,
+        // Lesson 1"). A pack is the same { characters, phrases } JSON shape
+        // as an upload; we reuse the exact same import path so loading a pack
+        // is indistinguishable from uploading a file — and, like uploads, the
+        // data lands in localStorage and keeps working offline / via file://.
+        this.PACKS_BASE = 'vocabulary_packs/';
+        this.packList = [];             // manifest entries (from packs.json)
+        this.customPackId = null;       // set when the active custom data came from a loaded pack
+
         this.loadCustomData();
+    }
+
+    // -------- Pre-loaded character packs --------
+    //
+    // Flow:  packs.json (manifest)  ->  user clicks a pack  ->
+    //       fetch <id>.json, validate, import as custom data (like upload),
+    //       reinitialize the game with it.
+
+    // Discover and hydrate built-in packs. Safe to call repeatedly.
+    // Resolves to packList (possibly empty if unavailable, e.g. file://).
+    async loadPacks() {
+        if (this._packsLoading) return this._packsLoading;
+        this._packsLoading = (async () => {
+            try {
+                const res = await fetch(this.PACKS_BASE + 'packs.json',
+                                        { cache: 'no-cache' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const manifest = await res.json();
+                this.packList = Array.isArray(manifest)
+                    ? manifest.map(m => this._normalizePackMeta(m)).filter(Boolean)
+                    : (manifest.packs || []).map(m => this._normalizePackMeta(m)).filter(Boolean);
+                return this.packList;
+            } catch (error) {
+                console.warn('Character packs unavailable (' + error.message + ')');
+                return [];
+            } finally {
+                this._packsLoading = null;
+            }
+        })();
+        return this._packsLoading;
+    }
+
+    // Accept manifest entries with or without a "file" field
+    _normalizePackMeta(m) {
+        if (!m || !m.id) return null;
+        return {
+            id: m.id,
+            file: m.file || (m.id + '.json'),
+            name: m.name || m.id,
+            grade: (m.grade !== undefined ? m.grade : null),
+            lesson: (m.lesson !== undefined ? m.lesson : null),
+            characters: (m.characters !== undefined ? m.characters : null),
+            phrases: (m.phrases !== undefined ? m.phrases : null),
+            description: m.description || ''
+        };
+    }
+
+    // Fetch + validate one pack's data (same structure the uploader uses,
+    // so the existing validators apply unchanged).
+    async fetchPack(id) {
+        const meta = this.packList.find(p => p.id === id);
+        if (!meta) throw new Error('Unknown pack "' + id + '"');
+        let res;
+        try {
+            res = await fetch(this.PACKS_BASE + meta.file, { cache: 'no-cache' });
+        } catch (error) {
+            throw new Error('Failed to download pack "' + id + '" (is the site served over http(s)?)');
+        }
+        if (!res.ok) throw new Error('Failed to download pack "' + id + '" (HTTP ' + res.status + ')');
+
+        const pack = await res.json();
+        const characters = pack.characters || {};
+        const phrases = pack.phrases || {};
+
+        const errors = [];
+        if (Object.keys(characters).length === 0) {
+            errors.push('Pack "' + id + '" contains no characters');
+        } else {
+            errors.push(...this.validateCharacterData(characters));
+        }
+        if (Object.keys(phrases).length) {
+            errors.push(...this.validatePhraseData(phrases));
+        }
+        if (errors.length) {
+            throw new Error('Pack "' + id + '" failed validation:\n' + errors.join('\n'));
+        }
+        return { characters, phrases };
+    }
+
+    // Import a pre-loaded pack. Reuses the regular custom-data storage so
+    // the pack keeps working offline / via file:// after the first load.
+    importPack(pack, meta) {
+        this.customCharacters = pack.characters || {};
+        this.customPhrases = pack.phrases || {};
+        this.customPackId = meta ? meta.id : (pack.id || null);
+        this.customPackName = meta ? meta.name : (pack.name || this.customPackId);
+        this.dataSource = 'custom';
+        this.saveCustomData();
+    }
+
+    getPackMeta(id) {
+        return this.packList.find(p => p.id === id) || null;
+    }
+
+    clearActivePack() {
+        // Pack data lives in the same localStorage slot as uploaded data;
+        // clearing a pack is the same as clearing custom data.
+        this.clearCustomData();
     }
 
     // Load any existing custom data from localStorage
@@ -18,6 +126,9 @@ class DataManager {
                 this.customCharacters = parsed.characters || {};
                 this.customPhrases = parsed.phrases || {};
                 this.dataSource = parsed.dataSource || 'built-in';
+                // Restore pack provenance, if this dataset came from a pack
+                this.customPackId = parsed.customPackId || null;
+                this.customPackName = parsed.customPackName || null;
                 console.log('Custom data loaded successfully');
             }
         } catch (error) {
@@ -31,7 +142,9 @@ class DataManager {
             const dataToSave = {
                 characters: this.customCharacters,
                 phrases: this.customPhrases,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                customPackId: this.customPackId || null,
+                customPackName: this.customPackName || null
             };
             localStorage.setItem('hanzi-game-custom-data', JSON.stringify(dataToSave));
             console.log('Custom data saved successfully');
@@ -279,7 +392,7 @@ class DataManager {
         };
     }
 
-    // Get active character data (custom or built-in)
+    // Get active character data (custom/pre-loaded pack > built-in)
     getActiveCharacterData() {
         if (this.dataSource === 'custom' && Object.keys(this.customCharacters).length > 0) {
             return this.customCharacters;
@@ -287,7 +400,7 @@ class DataManager {
         return DEFAULT_CHARACTERS;
     }
 
-    // Get active phrase data (custom or built-in)
+    // Get active phrase data (custom/pre-loaded pack > built-in)
     getActivePhraseData() {
         if (this.dataSource === 'custom' && Object.keys(this.customPhrases).length > 0) {
             return this.customPhrases;
